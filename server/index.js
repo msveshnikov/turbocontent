@@ -12,8 +12,8 @@ import { fileURLToPath } from 'url';
 import Feedback from './models/Feedback.js';
 import userRoutes from './user.js';
 import adminRoutes from './admin.js';
-import { authenticateToken, authenticateTokenOptional } from './middleware/auth.js';
-import { searchWebContent } from './search.js';
+import { authenticateTokenOptional } from './middleware/auth.js';
+import { getTextGemini } from './gemini';
 
 dotenv.config();
 
@@ -94,14 +94,13 @@ app.post('/api/feedback', authenticateTokenOptional, async (req, res) => {
 });
 
 app.post('/api/generate-content', async (req, res) => {
-    try {
-        const { topic, goal, platform, tone, model = 'gpt-4o-mini' } = req.body;
+    const { topic, goal, platform, tone, model = 'gpt-4o-mini' } = req.body;
 
-        if (!topic || !goal || !platform || !tone) {
-            return res.status(400).json({ error: 'Missing required parameters' });
-        }
+    if (!topic || !goal || !platform || !tone) {
+        return res.status(400).json({ error: 'Missing required parameters' });
+    }
 
-        const prompt = `Generate 3 different social media post options about the topic: "${topic}".
+    const prompt = `Generate 3 different social media post options about the topic: "${topic}".
         The goal of the posts is to "${goal}".
         The target platform is ${platform}.
         The desired tone is ${tone}.
@@ -114,17 +113,17 @@ app.post('/api/generate-content', async (req, res) => {
         Format each option as a JSON object with keys: text, hashtags, altText.
         Return the response as a JSON array of these objects.`;
 
-        const aiResponse = await generateAIResponse(prompt, model);
+    const aiResponse = await generateAIResponse(prompt, model);
 
-        let contentOptions;
-        try {
-            contentOptions = JSON.parse(aiResponse);
-            if (!Array.isArray(contentOptions)) {
-                contentOptions = [
-                    { text: aiResponse, hashtags: '', altText: 'Placeholder image description' }
-                ]; // Fallback if not valid JSON array
-            }
-        } catch (error) {
+    let contentOptions;
+    try {
+        contentOptions = JSON.parse(aiResponse);
+        if (!Array.isArray(contentOptions)) {
+            contentOptions = [
+                { text: aiResponse, hashtags: '', altText: 'Placeholder image description' }
+            ]; // Fallback if not valid JSON array
+        }
+        {
             contentOptions = [
                 { text: aiResponse, hashtags: '', altText: 'Placeholder image description' }
             ]; // Fallback if JSON parsing fails

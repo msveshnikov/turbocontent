@@ -13,12 +13,10 @@ import {
     PopoverTrigger,
     PopoverContent,
     useDisclosure,
-    useColorModeValue,
-    Image
+    useColorModeValue
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-// import logo from './assets/logo.png';
 import { UserContext } from './App';
 
 export default function Navbar() {
@@ -31,10 +29,6 @@ export default function Navbar() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         setUser(null);
-        navigate('/');
-    };
-
-    const handleLogoClick = () => {
         navigate('/');
     };
 
