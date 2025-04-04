@@ -1,0 +1,7 @@
+node_modules
+.git
+content
+docs
+*.md
+server/media
+media
