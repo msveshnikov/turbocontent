@@ -18,7 +18,7 @@ import {
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import logo from './assets/logo.png';
+// import logo from './assets/logo.png';
 import { UserContext } from './App';
 
 export default function Navbar() {
@@ -43,6 +43,7 @@ export default function Navbar() {
     };
 
     const NAV_ITEMS = [
+        { label: 'Docs', href: '/docs', requiresAuth: false },
         { label: 'Feedback', href: '/feedback', requiresAuth: false },
         ...(user?.isAdmin ? [{ label: 'Admin', href: '/admin', requiresAuth: true }] : [])
     ];
@@ -80,14 +81,14 @@ export default function Navbar() {
                     )}
                 </Flex>
                 <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }} align="center">
-                    <Image
+                    {/* <Image
                         src={logo}
                         alt="Boiler.pro Logo"
                         h="40px"
                         mr={3}
                         cursor="pointer"
                         onClick={handleLogoClick}
-                    />
+                    /> */}
                     <Flex display={{ base: 'none', md: 'flex' }} ml={10}>
                         <DesktopNav navItems={filteredNavItems} />
                     </Flex>

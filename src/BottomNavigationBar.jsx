@@ -1,6 +1,6 @@
 import { Box, Icon, Text } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
-import { FiHome, FiBarChart2, FiUser } from 'react-icons/fi';
+import { FiHome, FiBookOpen, FiUser } from 'react-icons/fi';
 
 export const BottomNavigationBar = () => (
     <Box
@@ -27,27 +27,20 @@ export const BottomNavigationBar = () => (
             <Icon as={FiHome} boxSize={5} />
             <Text fontSize="xs">Home</Text>
         </Box>
-        <Box
-            as={Link}
-            to="/presentation"
-            p={2}
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-        >
-            <Icon as={FiBarChart2} boxSize={5} />
-            <Text fontSize="xs">Presentation</Text>
+        <Box as={Link} to="/docs" p={2} display="flex" flexDirection="column" alignItems="center">
+            <Icon as={FiBookOpen} boxSize={5} />
+            <Text fontSize="xs">Docs</Text>
         </Box>
         <Box
             as={Link}
-            to="/insights"
+            to="/profile"
             p={2}
             display="flex"
             flexDirection="column"
             alignItems="center"
         >
             <Icon as={FiUser} boxSize={5} />
-            <Text fontSize="xs">Insights</Text>
+            <Text fontSize="xs">Profile</Text>
         </Box>
     </Box>
 );

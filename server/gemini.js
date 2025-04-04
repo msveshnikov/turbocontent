@@ -1,7 +1,7 @@
 import { VertexAI } from '@google-cloud/vertexai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
-import { MAX_AVATAR_COMMENT_TOKENS } from './replyService.js';
+import { MAX_AVATAR_COMMENT_TOKENS } from './utils.js';
 import { dirname, join } from 'path';
 import { nanoid } from 'nanoid';
 import sharp from 'sharp';
@@ -85,4 +85,25 @@ export const convertImage = async (imageBuffer) => {
         console.error('Image conversion error:', error.message);
         return null;
     }
+};
+
+const MODEL_SOCIAL_MEDIA = 'gemini-pro';
+
+export const generateSocialMediaText = async (topic, goal, platform, tone) => {
+    const prompt = `Generate engaging social media content for ${platform}. 
+Topic: ${topic}. 
+Goal: ${goal}. 
+Tone: ${tone}. 
+Create a few options.`;
+    return await getTextGemini(prompt, MODEL_SOCIAL_MEDIA, 0.7);
+};
+
+export const generateHashtags = async (topic, platform, tone) => {
+    const prompt = `Generate relevant and trending hashtags for a social media post on ${platform} about ${topic} with a ${tone} tone.`;
+    return await getTextGemini(prompt, MODEL_SOCIAL_MEDIA, 0.5);
+};
+
+export const generateAltText = async (imageDescription) => {
+    const prompt = `Write descriptive alt text for an image depicting: ${imageDescription}. Focus on accessibility and SEO.`;
+    return await getTextGemini(prompt, MODEL_SOCIAL_MEDIA, 0.5);
 };
