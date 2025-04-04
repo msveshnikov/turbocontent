@@ -15,5 +15,3 @@ db.users.updateOne(
     },
     { upsert: true }
 );
-
-
