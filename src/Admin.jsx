@@ -199,17 +199,14 @@ const Admin = () => {
             try {
                 setIsLoading(true);
                 const token = localStorage.getItem('token');
-                const response = await fetch(
-                    `${API_URL}/api/admin/contents/${contentId}/privacy`,
-                    {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ isPrivate: newPrivacy })
-                    }
-                );
+                const response = await fetch(`${API_URL}/api/admin/contents/${contentId}/privacy`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ isPrivate: newPrivacy })
+                });
                 if (!response.ok) throw new Error();
                 toast({
                     title: 'Success',
@@ -309,15 +306,11 @@ const Admin = () => {
                     <Box w="full" h="400px" p={4}>
                         <Line
                             data={{
-                                labels: stats.contentsStats.contentGrowth.map(
-                                    (d) => d._id
-                                ),
+                                labels: stats.contentsStats.contentGrowth.map((d) => d._id),
                                 datasets: [
                                     {
                                         label: 'Content Growth',
-                                        data: stats.contentsStats.contentGrowth.map(
-                                            (d) => d.count
-                                        ),
+                                        data: stats.contentsStats.contentGrowth.map((d) => d.count),
                                         borderColor: '#3498DB',
                                         tension: 0.4
                                     }

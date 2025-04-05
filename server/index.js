@@ -59,12 +59,12 @@ adminRoutes(app);
 
 const generateAIResponse = async (prompt, model, temperature = 0.7) => {
     switch (model) {
-        case 'gemini-2.0-pro-exp-02-05':
+        case 'gemini-2.5-pro-exp-03-25':
         case 'gemini-2.0-flash-001':
         case 'gemini-2.0-flash-thinking-exp-01-21':
             return await getTextGemini(prompt, model, temperature);
         default:
-            return await getTextGemini(prompt, 'gemini-2.0-pro-exp-02-05', temperature);
+            return await getTextGemini(prompt, 'gemini-2.0-flash-thinking-exp-01-21', temperature);
     }
 };
 
@@ -87,7 +87,13 @@ app.post('/api/feedback', authenticateTokenOptional, async (req, res) => {
 
 app.post('/api/generate-content', async (req, res) => {
     try {
-        const { topic, goal, platform, tone, model = 'gemini-2.0-pro-exp-02-05' } = req.body;
+        const {
+            topic,
+            goal,
+            platform,
+            tone,
+            model = 'gemini-2.0-flash-thinking-exp-01-21'
+        } = req.body;
 
         if (!topic || !goal || !platform || !tone) {
             return res.status(400).json({
