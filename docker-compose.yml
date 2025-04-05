@@ -10,6 +10,7 @@ services:
             - OPENAI_KEY=${OPENAI_KEY}
             - DEEPSEEK_KEY=${DEEPSEEK_KEY}
             - GOOGLE_KEY=${GOOGLE_KEY}
+            - GEMINI_KEY=${GEMINI_KEY}
             - CLAUDE_KEY=${CLAUDE_KEY}
             - GROK_KEY=${GROK_KEY}
             - UNSPLASH_API_KEY=${UNSPLASH_API_KEY}
