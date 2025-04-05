@@ -98,7 +98,7 @@ app.post('/api/generate-content', authenticateTokenOptional, async (req, res) =>
         prompt += `\n\nPost option should include:
             - Engaging text optimized for the platform.
             - Relevant images and hashtags.
-            - Always include at least 1 image (better 3, in the middle of the text, to illustrate parts).
+            - Always include at least 3 images inside text, distributed properly,not all in one).
 
             Return the response as markdown`;
 
