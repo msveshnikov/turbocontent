@@ -89,49 +89,62 @@ app.post('/api/feedback', authenticateTokenOptional, async (req, res) => {
         await feedback.save();
         res.status(201).json(feedback);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Feedback submission error:', error);
+        res.status(500).json({ error: 'Failed to submit feedback', details: error.message });
     }
 });
 
 app.post('/api/generate-content', async (req, res) => {
-    const { topic, goal, platform, tone, model = 'gpt-4o-mini' } = req.body;
-
-    if (!topic || !goal || !platform || !tone) {
-        return res.status(400).json({ error: 'Missing required parameters' });
-    }
-
-    const prompt = `Generate 3 different social media post options about the topic: "${topic}".
-        The goal of the posts is to "${goal}".
-        The target platform is ${platform}.
-        The desired tone is ${tone}.
-
-        Each post option should include:
-        - Engaging text optimized for the platform.
-        - Relevant hashtags.
-        - A short description for alt text for an image that would be relevant to the post.
-
-        Format each option as a JSON object with keys: text, hashtags, altText.
-        Return the response as a JSON array of these objects.`;
-
-    const aiResponse = await generateAIResponse(prompt, model);
-
-    let contentOptions;
     try {
-        contentOptions = JSON.parse(aiResponse);
-        if (!Array.isArray(contentOptions)) {
-            contentOptions = [
-                { text: aiResponse, hashtags: '', altText: 'Placeholder image description' }
-            ]; // Fallback if not valid JSON array
+        const { topic, goal, platform, tone, model = 'gemini-2.0-pro-exp-02-05' } = req.body;
+
+        if (!topic || !goal || !platform || !tone) {
+            return res.status(400).json({
+                error: 'Missing required parameters: topic, goal, platform, and tone are required.'
+            });
         }
-        {
+
+        const prompt = `Generate 3 different social media post options about the topic: "${topic}".
+            The goal of the posts is to "${goal}".
+            The target platform is ${platform}.
+            The desired tone is ${tone}.
+
+            Each post option should include:
+            - Engaging text optimized for the platform.
+            - Relevant hashtags.
+            - A short description for alt text for an image that would be relevant to the post.
+
+            Format each option as a JSON object with keys: text, hashtags, altText.
+            Return the response as a JSON array of these objects.`;
+
+        let aiResponse;
+        try {
+            aiResponse = await generateAIResponse(prompt, model);
+        } catch (aiError) {
+            console.error('AI generation failed:', aiError);
+            return res
+                .status(500)
+                .json({ error: 'AI content generation failed', details: aiError.message });
+        }
+
+        let contentOptions;
+        try {
+            contentOptions = JSON.parse(aiResponse);
+            if (!Array.isArray(contentOptions)) {
+                contentOptions = [
+                    { text: aiResponse, hashtags: '', altText: 'Placeholder image description' }
+                ];
+            }
+        } catch (parseError) {
+            console.error('JSON parsing failed:', parseError);
             contentOptions = [
                 { text: aiResponse, hashtags: '', altText: 'Placeholder image description' }
-            ]; // Fallback if JSON parsing fails
+            ]; // Fallback even if JSON parsing fails, to return raw text.
         }
 
         res.status(200).json(contentOptions);
     } catch (error) {
-        console.error('Error generating content:', error);
+        console.error('Error processing generate-content request:', error);
         res.status(500).json({ error: 'Failed to generate content', details: error.message });
     }
 });

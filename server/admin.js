@@ -1,6 +1,7 @@
 import { authenticateToken, isAdmin } from './middleware/auth.js';
 import User from './models/User.js';
 import Feedback from './models/Feedback.js';
+import Content from './models/Content.js';
 
 const adminRoutes = (app) => {
     app.get('/api/admin/users', authenticateToken, isAdmin, async (req, res) => {
@@ -19,14 +20,14 @@ const adminRoutes = (app) => {
                 totalUsers,
                 premiumUsers,
                 trialingUsers,
-                totalPresentations,
+                totalContents,
                 userGrowth,
-                presentationGrowth
+                contentGrowth
             ] = await Promise.all([
                 User.countDocuments(),
                 User.countDocuments({ subscriptionStatus: 'active' }),
                 User.countDocuments({ subscriptionStatus: 'trialing' }),
-                Presentation.countDocuments(),
+                Content.countDocuments(),
                 User.aggregate([
                     {
                         $group: {
@@ -37,7 +38,7 @@ const adminRoutes = (app) => {
                     { $sort: { _id: 1 } },
                     { $limit: 30 }
                 ]),
-                Presentation.aggregate([
+                Content.aggregate([
                     {
                         $group: {
                             _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
@@ -58,9 +59,9 @@ const adminRoutes = (app) => {
                     conversionRate
                 },
                 userGrowth,
-                presentationsStats: {
-                    totalPresentations,
-                    presentationGrowth
+                contentsStats: {
+                    totalContents,
+                    contentGrowth
                 }
             });
         } catch (error) {
@@ -81,39 +82,34 @@ const adminRoutes = (app) => {
         }
     });
 
-    app.get('/api/admin/presentations', authenticateToken, isAdmin, async (req, res) => {
+    app.get('/api/admin/contents', authenticateToken, isAdmin, async (req, res) => {
         try {
-            const presentations = await Presentation.find()
+            const contents = await Content.find()
                 .populate('userId', 'email')
                 .sort({ createdAt: -1 });
-            res.json(presentations);
+            res.json(contents);
         } catch (error) {
             console.error('Admin presentations fetch error:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     });
 
-    app.get(
-        '/api/admin/presentations-model-stats',
-        authenticateToken,
-        isAdmin,
-        async (req, res) => {
-            try {
-                const modelStats = await Presentation.aggregate([
-                    {
-                        $group: {
-                            _id: '$model',
-                            count: { $sum: 1 }
-                        }
+    app.get('/api/admin/contents-model-stats', authenticateToken, isAdmin, async (req, res) => {
+        try {
+            const modelStats = await Content.aggregate([
+                {
+                    $group: {
+                        _id: '$model',
+                        count: { $sum: 1 }
                     }
-                ]);
-                res.json(modelStats);
-            } catch (error) {
-                console.error('Admin presentation model stats error:', error);
-                res.status(500).json({ error: 'Internal server error' });
-            }
+                }
+            ]);
+            res.json(modelStats);
+        } catch (error) {
+            console.error('Admin presentation model stats error:', error);
+            res.status(500).json({ error: 'Internal server error' });
         }
-    );
+    });
 
     app.delete('/api/admin/users/:id', authenticateToken, isAdmin, async (req, res) => {
         try {
@@ -121,7 +117,7 @@ const adminRoutes = (app) => {
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
-            await Promise.all([Presentation.deleteMany({ userId: req.params.id })]);
+            await Promise.all([Content.deleteMany({ userId: req.params.id })]);
             res.json({ message: 'User and associated data deleted successfully' });
         } catch (error) {
             console.error('Admin user delete error:', error);
@@ -142,10 +138,10 @@ const adminRoutes = (app) => {
         }
     });
 
-    app.delete('/api/admin/presentations/:id', authenticateToken, isAdmin, async (req, res) => {
+    app.delete('/api/admin/contents/:id', authenticateToken, isAdmin, async (req, res) => {
         try {
-            const presentation = await Presentation.findByIdAndDelete(req.params.id);
-            if (!presentation) {
+            const content = await Content.findByIdAndDelete(req.params.id);
+            if (!content) {
                 return res.status(404).json({ error: 'Presentation not found' });
             }
             res.json({ message: 'Presentation deleted successfully' });
@@ -183,29 +179,24 @@ const adminRoutes = (app) => {
         }
     });
 
-    app.put(
-        '/api/admin/presentations/:id/privacy',
-        authenticateToken,
-        isAdmin,
-        async (req, res) => {
-            try {
-                const { isPrivate } = req.body;
-                if (typeof isPrivate !== 'boolean') {
-                    return res.status(400).json({ error: 'Invalid private status' });
-                }
-                const presentation = await Presentation.findById(req.params.id);
-                if (!presentation) {
-                    return res.status(404).json({ error: 'Presentation not found' });
-                }
-                presentation['isPrivate'] = isPrivate;
-                await presentation.save();
-                res.json({ message: 'Presentation privacy status updated successfully' });
-            } catch (error) {
-                console.error('Admin presentation privacy update error:', error);
-                res.status(500).json({ error: 'Internal server error' });
+    app.put('/api/admin/contents/:id/privacy', authenticateToken, isAdmin, async (req, res) => {
+        try {
+            const { isPrivate } = req.body;
+            if (typeof isPrivate !== 'boolean') {
+                return res.status(400).json({ error: 'Invalid private status' });
             }
+            const content = await Content.findById(req.params.id);
+            if (!content) {
+                return res.status(404).json({ error: 'Presentation not found' });
+            }
+            content.isPrivate = isPrivate;
+            await content.save();
+            res.json({ message: 'Presentation privacy status updated successfully' });
+        } catch (error) {
+            console.error('Admin presentation privacy update error:', error);
+            res.status(500).json({ error: 'Internal server error' });
         }
-    );
+    });
 };
 
 export default adminRoutes;

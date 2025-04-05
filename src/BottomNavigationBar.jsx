@@ -27,9 +27,16 @@ export const BottomNavigationBar = () => (
             <Icon as={FiHome} boxSize={5} />
             <Text fontSize="xs">Home</Text>
         </Box>
-        <Box as={Link} to="/docs" p={2} display="flex" flexDirection="column" alignItems="center">
+        <Box
+            as={Link}
+            to="/content"
+            p={2}
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+        >
             <Icon as={FiBookOpen} boxSize={5} />
-            <Text fontSize="xs">Docs</Text>
+            <Text fontSize="xs">Content</Text>
         </Box>
         <Box
             as={Link}

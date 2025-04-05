@@ -4,6 +4,8 @@ Tagline: Instantly Generate Engaging Social Media Content.
 
 Target Audience: Social Media Managers, Small Businesses, Marketing Agencies, Influencers.
 
+![alt text](public/image.png)
+
 Core Functionality:
 
 Empowering users to effortlessly create compelling social media content. Simply input a topic,
@@ -14,6 +16,13 @@ SaaS then instantly generates multiple post options, each thoughtfully crafted w
 Visually Appealing Image(s): Relevant and engaging images to capture attention. Tailored Text:
 Platform-optimized text that resonates with your audience. Relevant Hashtags: Increased
 discoverability and reach. Descriptive Alt Text: Accessibility and SEO considerations.
+
+Value Proposition:
+
+Dramatically reduces the time, effort, and cost associated with creating consistent, engaging, and
+platform-optimized social media content, empowering users to maintain a strong online presence,
+amplify their brand message, and achieve their social media marketing goals efficiently and
+effectively.
 
 ## Project Architecture
 
@@ -37,14 +46,13 @@ discoverability and reach. Descriptive Alt Text: Accessibility and SEO considera
     - Entry point & core logic: `index.js`, `utils.js`
     - Authentication & user routes: `user.js`, `middleware/auth.js`
     - Administration routes: `admin.js`
-    - AI model integrations: `claude.js`, `deepseek.js`, `gemini.js`, `grok.js`, `openai.js`
     - Supporting services: `search.js` (Potential image service integration point)
     - Data Models (Mongoose): `models/Feedback.js`, `models/User.js`
     - Server dependencies: `package.json`
 
 - **Public (`public/`):**
     - Static assets & configuration: `ads.txt`, `landing.html` (Static fallback/alternative),
-      `robots.txt`, `styles.css` (Global/legacy styles)
+      `robots.txt`, `styles.css` (Global/legacy/landing styles)
 
 This organized structure fosters clear separation of concerns (Client/Server/Public), simplifies
 debugging, adheres to best security practices (auth middleware), and supports independent scaling
@@ -66,8 +74,8 @@ Turbocontent, leveraging the described project structure.
 
 2.  **Mobile-First Responsive Design:**
 
-    - Adopt a mobile-first approach using flexible grid layouts and media queries (`styles.css`,
-      potentially component-level styling) for seamless experience across devices.
+    - Adopt a mobile-first approach using flexible grid layouts and media queries using Chakra UI
+      for seamless experience across devices.
     - Optimize touch targets and interactions, especially for `BottomNavigationBar.jsx` and
       interactive elements within the generation flow.
     - Ensure proper viewport settings and optimize assets (images, scripts) for mobile performance.
@@ -107,22 +115,14 @@ Turbocontent, leveraging the described project structure.
     - Integrate contextual help (tooltips, inline examples) within the UI.
     - Develop an interactive onboarding tutorial for first-time users.
     - Design informative empty states with prompts.
-    - Provide comprehensive documentation accessible via `Docs.jsx`.
 
-8.  **Accessibility First (WCAG Compliance):**
-
-    - Adhere strictly to WCAG guidelines using semantic HTML5, ARIA attributes, ensuring keyboard
-      navigability (`Navbar.jsx`, forms in `Login.jsx`, `SignUp.jsx`, etc.), sufficient color
-      contrast, and screen reader compatibility.
-    - Ensure all images generated or selectable include descriptive alt text fields.
-
-9.  **Consistent Visual Language & Theming:**
+8.  **Consistent Visual Language & Theming:**
 
     - Maintain visual consistency using a well-defined design system or component library approach
       within the React structure (`src/`).
     - Implement theming options (light/dark mode), potentially configurable via `Profile.jsx`.
 
-10. **Enhanced User Management & Personalization:**
+9.  **Enhanced User Management & Personalization:**
 
     - Leverage the dedicated components (`Login.jsx`, `SignUp.jsx`, `Forgot.jsx`, `Reset.jsx`,
       `Profile.jsx`) and secure backend routes (`server/user.js`, `server/middleware/auth.js`) for
@@ -130,40 +130,32 @@ Turbocontent, leveraging the described project structure.
     - Allow users to manage their profile, potentially save preferences, and view past generations
       via `Profile.jsx`.
 
-11. **Admin & Feedback Management:**
+10. **Admin & Feedback Management:**
 
     - Utilize `Admin.jsx` to build a dedicated interface for administrators to manage users, review
       feedback submitted via `Feedback.jsx` (linked to `models/Feedback.js`), and monitor system
       health.
 
-12. **Strategic AI Integration:**
-
-    - Leverage the diverse AI integrations (`claude.js`, `deepseek.js`, `gemini.js`, `grok.js`,
-      `openai.js`) effectively, potentially offering user choice or smart defaults based on the
-      generation task.
-    - Integrate image generation/selection smoothly into the workflow.
-
-13. **Content Organization & Management:**
+11. **Content Organization & Management:**
 
     - Implement features allowing users (via `Profile.jsx` or dedicated area) to save, tag, search,
       and organize generated content for easy reuse.
 
-14. **Micro-interactions & Delight:**
+12. **Micro-interactions & Delight:**
 
     - Incorporate subtle animations and feedback (hover effects, transitions, loading indicators) to
       enhance user engagement and provide a polished feel.
 
-15. **Future-Proof Architecture:**
+13. **Future-Proof Architecture:**
     - Design components with future integrations in mind, such as the content calendar, analytics
       dashboard, direct publishing, and team collaboration features outlined in "Potential
       Features".
 
 ## Technical Considerations:
 
-- **Front-End Focus (Current):** Leverage semantic HTML5, CSS3 (potentially utility-first like
-  Tailwind CSS or component libraries), and modern JavaScript (ES6+) with React (`src/`) for a
-  dynamic, interactive, and performant UX. Utilize Vite (`vite.config.js`) for optimized development
-  and build processes.
+- **Front-End Focus (Current):** Leverage semantic Chakra UI, and modern JavaScript (ES6+) with
+  React (`src/`) for a dynamic, interactive, and performant UX. Utilize Vite (`vite.config.js`) for
+  optimized development and build processes.
 - **Modular and Reusable Component-Based Architecture:** Structure the React application (`src/`)
   using modular components for maintainability, scalability, testability, and easier feature
   additions.
@@ -174,11 +166,6 @@ Turbocontent, leveraging the described project structure.
 - **Performance Optimization:** Prioritize front-end performance via code splitting (Vite), asset
   optimization (image compression, minification), lazy loading, and browser caching strategies.
   Optimize backend queries and AI interactions.
-- **Testing and Quality Assurance:** Implement front-end (React Testing Library/Jest) and back-end
-  testing strategies. Consider E2E testing (Cypress/Playwright) for critical user flows (auth,
-  generation). Conduct cross-browser testing.
-- **Version Control and Collaboration:** Utilize Git for version control, employing clear branching
-  strategies (e.g., Gitflow) and code reviews.
 - **Security:** Implement security best practices on both client and server: secure authentication
   (`middleware/auth.js`), input validation, rate limiting (consider adding), environment variable
   management, and dependency vulnerability scanning.
@@ -216,24 +203,9 @@ Turbocontent, leveraging the described project structure.
 - **Team Collaboration & User Account Management with Roles & Permissions:** Introduce secure user
   accounts and team collaboration features for shared workspaces, role-based access control,
   collaborative content creation workflows, and team-based content calendar management.
-- **Enhanced Image Service Integration:** Integrate `server/imageService.js` (or similar) more
-  deeply for AI-powered image generation (e.g., DALL-E via `openai.js`) or advanced stock photo
-  integration (Unsplash, Pexels) with intelligent suggestions based on topic/platform.
-
-Value Proposition:
-
-Dramatically reduces the time, effort, and cost associated with creating consistent, engaging, and
-platform-optimized social media content, empowering users to maintain a strong online presence,
-amplify their brand message, and achieve their social media marketing goals efficiently and
-effectively.
 
 # TODO
 
 - [ ] Implement detailed UI for `Admin.jsx`.
 - [ ] Flesh out `Profile.jsx` with user settings and content management features.
-- [ ] Integrate image generation/selection service (`server/imageService.js` placeholder).
-- [ ] Develop comprehensive documentation content for `Docs.jsx`.
 - [ ] Add robust error handling and user feedback mechanisms throughout the app.
-- [ ] Implement unit and integration tests for client and server components.
-- [ ] Set up CI/CD pipeline (e.g., GitHub Actions).
-- [ ] Refine AI model selection logic (`server/index.js` or dedicated module).
