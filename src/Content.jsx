@@ -50,7 +50,8 @@ function Content() {
             const response = await fetch(`${API_URL}/api/generate-content`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
                 },
                 body: JSON.stringify({ topic, goal, platform, tone })
             });

@@ -468,7 +468,7 @@ const Admin = () => {
                         <Table variant="simple">
                             <Thead>
                                 <Tr>
-                                    <Th>Title</Th>
+                                    <Th>Topic</Th>
                                     <Th>User</Th>
                                     <Th>Date</Th>
                                     <Th>Private</Th>
@@ -478,7 +478,7 @@ const Admin = () => {
                             <Tbody>
                                 {contents.map((content) => (
                                     <Tr key={content._id}>
-                                        <Td>{content.title}</Td>
+                                        <Td>{content.topic}</Td>
                                         <Td>{content.userId?.email || 'N/A'}</Td>
                                         <Td>{new Date(content.createdAt).toLocaleString()}</Td>
                                         <Td>

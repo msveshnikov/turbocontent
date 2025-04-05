@@ -108,12 +108,11 @@ app.post('/api/generate-content', authenticateTokenOptional, async (req, res) =>
                 platform,
                 tone,
                 content: aiResponse,
-                model: 'Gemini',
                 isPrivate: false
             });
 
-            const savedContent = await newContent.save();
-            return res.status(200).json({ content: aiResponse, savedContent: savedContent });
+            await newContent.save();
+            return res.status(200).json({ content: aiResponse });
         } catch (saveError) {
             console.error('Error auto-saving content:', saveError);
             return res
