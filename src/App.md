@@ -59,7 +59,7 @@ The file imports several libraries and components:
 ### API_URL
 
 ```jsx
-export const API_URL = import.meta.env.DEV ? 'http://localhost:3000' : 'https://turbocontent.pro';
+export const API_URL = import.meta.env.DEV ? 'http://localhost:3000' : 'https://turbocontent.art';
 ```
 
 - **Purpose:**  

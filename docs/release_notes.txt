@@ -1,0 +1,17 @@
+**Turbocontent - Initial Release**
+
+Welcome to the first version of Turbocontent!
+
+This release includes the following key features:
+
+- **AI-Powered Content Generation:** Instantly generate social media content by providing a topic, marketing goal, target platform, and desired tone.
+- **Platform Support:** Create content optimized for Instagram, Facebook, Twitter, LinkedIn, and Pinterest.
+- **Comprehensive Post Creation:** Each generated post includes:
+    - Relevant and engaging image suggestions.
+    - Platform-tailored text.
+    - Relevant hashtags to increase reach.
+    - Descriptive alt text for image accessibility.
+- **User-Friendly Interface:** Simple and intuitive design for effortless content creation.
+- **Account Creation & Profile:** Sign up and manage your profile (basic profile features in this release).
+
+Stay tuned for future updates with more features and enhancements! We appreciate your feedback as we continue to improve Turbocontent.

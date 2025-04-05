@@ -22,7 +22,7 @@ services:
             - EMAIL=${EMAIL}
             - FROM_EMAIL=${FROM_EMAIL}
             - EMAIL_PASSWORD=${EMAIL_PASSWORD}
-            - FRONTEND_URL=https://Turbocontent.pro
+            - FRONTEND_URL=https://Turbocontent.art
         depends_on:
             - mongodb
         restart: unless-stopped

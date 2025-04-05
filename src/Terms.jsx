@@ -32,9 +32,9 @@ const Terms = () => {
                         1. Acceptance of Terms
                     </Heading>
                     <Text mb={4}>
-                        By accessing and using Turbocontent.pro, you agree to comply with these
+                        By accessing and using Turbocontent.art, you agree to comply with these
                         Terms of Service and acknowledge that this agreement represents a legally
-                        binding contract between you and Turbocontent.pro. If you do not agree with
+                        binding contract between you and Turbocontent.art. If you do not agree with
                         these terms, please do not use the platform.
                     </Text>
                 </Box>
@@ -45,7 +45,7 @@ const Terms = () => {
                     </Heading>
                     <Text mb={4}>
                         Permission is granted to temporarily download one copy of the materials
-                        (information or software) on Turbocontent.pro for personal, non-commercial
+                        (information or software) on Turbocontent.art for personal, non-commercial
                         transitory viewing only. This constitutes a license to use the materials
                         under the terms specified herein, not a transfer of title.
                     </Text>
@@ -58,7 +58,7 @@ const Terms = () => {
                     <Text mb={4}>
                         Our platform employs advanced AI algorithms for data aggregation, research
                         synthesis, and presentation generation. While we strive for accuracy,
-                        Turbocontent.pro does not warrant that the AI-generated outputs or insights
+                        Turbocontent.art does not warrant that the AI-generated outputs or insights
                         will be error-free or applicable for specific purposes.
                     </Text>
                     <UnorderedList spacing={2} mb={4}>
@@ -75,7 +75,7 @@ const Terms = () => {
                         4. Research Data &amp; Accuracy
                     </Heading>
                     <Text mb={4}>
-                        Turbocontent.pro endeavors to provide accurate and reliable research
+                        Turbocontent.art endeavors to provide accurate and reliable research
                         insights and presentation content. However, we make no guarantees regarding
                         the completeness, accuracy, or reliability of the data. Users are
                         responsible for verifying any critical information obtained from the
@@ -88,7 +88,7 @@ const Terms = () => {
                         5. Features
                     </Heading>
                     <Text mb={4}>
-                        Turbocontent.pro offers features such as automated research aggregation,
+                        Turbocontent.art offers features such as automated research aggregation,
                         rapid presentation generation, dynamic slide customization, and AI-powered
                         insights. These features are subject to periodic updates and modifications
                         without prior notice.
@@ -100,7 +100,7 @@ const Terms = () => {
                         6. Liability
                     </Heading>
                     <Text mb={4}>
-                        In no event shall Turbocontent.pro or its suppliers be liable for any
+                        In no event shall Turbocontent.art or its suppliers be liable for any
                         direct, indirect, incidental, consequential, or punitive damages arising
                         from your use of, or inability to use, the materials on this platform, even
                         if advised of the possibility of such damages.
@@ -125,7 +125,7 @@ const Terms = () => {
                     </Heading>
                     <Text mb={4}>
                         These Terms shall be governed by and construed in accordance with the laws
-                        of the jurisdiction in which Turbocontent.pro operates, without regard to
+                        of the jurisdiction in which Turbocontent.art operates, without regard to
                         its conflict of law provisions.
                     </Text>
                 </Box>
@@ -137,7 +137,7 @@ const Terms = () => {
                     <Text mb={4}>
                         Any disputes arising out of or related to these Terms shall be resolved
                         through binding arbitration in accordance with the rules of the applicable
-                        arbitration body. By using Turbocontent.pro, you agree to submit to such
+                        arbitration body. By using Turbocontent.art, you agree to submit to such
                         arbitration.
                     </Text>
                 </Box>
@@ -148,8 +148,8 @@ const Terms = () => {
                     </Heading>
                     <Text mb={4}>
                         All content, trademarks, and other intellectual property on
-                        Turbocontent.pro, including text, graphics, logos, images, and software,
-                        remain the property of Turbocontent.pro and are protected by international
+                        Turbocontent.art, including text, graphics, logos, images, and software,
+                        remain the property of Turbocontent.art and are protected by international
                         copyright and trademark laws.
                     </Text>
                 </Box>
@@ -159,7 +159,7 @@ const Terms = () => {
                         11. Indemnification
                     </Heading>
                     <Text mb={4}>
-                        You agree to indemnify, defend, and hold harmless Turbocontent.pro, its
+                        You agree to indemnify, defend, and hold harmless Turbocontent.art, its
                         affiliates, officers, directors, employees, and agents from any claims,
                         damages, or expenses arising from your use of the platform or your violation
                         of these Terms.
@@ -172,7 +172,7 @@ const Terms = () => {
                     </Heading>
                     <Text mb={4}>
                         We reserve the right to terminate or suspend your access to
-                        Turbocontent.pro, without prior notice or liability, for any reason,
+                        Turbocontent.art, without prior notice or liability, for any reason,
                         including but not limited to a breach of these Terms.
                     </Text>
                 </Box>

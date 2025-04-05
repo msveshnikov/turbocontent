@@ -9,7 +9,6 @@ import {
     Heading,
     Text,
     useToast,
-    Select,
     Container,
     Card,
     CardBody,
@@ -27,10 +26,14 @@ import {
     Collapse,
     InputGroup,
     InputLeftElement,
-    Icon
+    Icon,
+    Spinner,
+    Center,
+    useColorModeValue,
+    Image
 } from '@chakra-ui/react';
 import { API_URL, UserContext } from './App';
-import { DeleteIcon, ViewIcon, Search2Icon } from '@chakra-ui/icons';
+import { DeleteIcon, ViewIcon, Search2Icon, ExternalLinkIcon } from '@chakra-ui/icons';
 import { formatDistanceToNow } from 'date-fns';
 
 const Profile = () => {
@@ -43,6 +46,40 @@ const Profile = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredContentList, setFilteredContentList] = useState([]);
 
+    const cardBg = useColorModeValue('white', 'gray.700');
+    const tableHeaderBg = useColorModeValue('gray.50', 'gray.600');
+    const detailCardBg = useColorModeValue('gray.50', 'gray.800');
+    const borderColor = useColorModeValue('gray.200', 'gray.600');
+
+    // Fetch user profile data if not already loaded (e.g., on page refresh)
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!user) {
+                setIsLoading(true);
+                try {
+                    const response = await fetch(`${API_URL}/api/profile`, {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        setUser(data);
+                    } else {
+                        // Handle error, maybe redirect to login
+                        console.error('Failed to fetch profile');
+                    }
+                } catch (error) {
+                    console.error('Error fetching profile:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        };
+        fetchProfile();
+    }, [user, setUser]);
+
+    // Fetch generated content
     useEffect(() => {
         const fetchContent = async () => {
             setContentLoading(true);
@@ -54,7 +91,10 @@ const Profile = () => {
                 });
                 if (response.ok) {
                     const data = await response.json();
+                    // Sort content by creation date, newest first
+                    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                     setContentList(data);
+                    setFilteredContentList(data); // Initialize filtered list
                 } else {
                     toast({
                         title: 'Error loading content',
@@ -68,7 +108,7 @@ const Profile = () => {
                 console.error('Error fetching content:', error);
                 toast({
                     title: 'Error loading content',
-                    description: 'Failed to load generated content.',
+                    description: 'An unexpected error occurred.',
                     status: 'error',
                     duration: 3000,
                     isClosable: true
@@ -78,40 +118,28 @@ const Profile = () => {
             }
         };
 
-        fetchContent();
-    }, [toast]);
+        if (user) {
+            // Only fetch content if user is loaded
+            fetchContent();
+        }
+    }, [toast, user]); // Depend on user to ensure token is available
 
+    // Filter content based on search query
     useEffect(() => {
-        const filterContent = () => {
-            if (!searchQuery) {
-                setFilteredContentList([...contentList]);
-                return;
-            }
-            const filtered = contentList.filter((content) => {
-                return (
-                    content.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    content.platform.toLowerCase().includes(searchQuery.toLowerCase())
-                );
-            });
-            setFilteredContentList(filtered);
-        };
-
-        filterContent();
+        const lowerCaseQuery = searchQuery.toLowerCase();
+        const filtered = contentList.filter((content) => {
+            return (
+                content.topic?.toLowerCase().includes(lowerCaseQuery) ||
+                content.platform?.toLowerCase().includes(lowerCaseQuery) ||
+                content.goal?.toLowerCase().includes(lowerCaseQuery) ||
+                content.tone?.toLowerCase().includes(lowerCaseQuery) ||
+                content.contentOptions?.some((opt) =>
+                    opt.text?.toLowerCase().includes(lowerCaseQuery)
+                )
+            );
+        });
+        setFilteredContentList(filtered);
     }, [searchQuery, contentList]);
-
-    useEffect(() => {
-        setFilteredContentList([...contentList]);
-    }, [contentList]);
-
-    const handleChange = (section, field, value) => {
-        setUser((prev) => ({
-            ...prev,
-            [section]: {
-                ...(prev[section] || {}),
-                [field]: value
-            }
-        }));
-    };
 
     const handleBasicChange = (field, value) => {
         setUser((prev) => ({
@@ -133,13 +161,14 @@ const Profile = () => {
                 },
                 body: JSON.stringify({
                     firstName: user?.firstName,
-                    lastName: user?.lastName,
-                    researchPreferences: user?.researchPreferences,
-                    presentationSettings: user?.presentationSettings,
-                    preferences: user?.preferences
+                    lastName: user?.lastName
+                    // Add other updatable fields here if needed in the future
+                    // preferences: user?.preferences,
                 })
             });
+            const updatedUser = await response.json();
             if (response.ok) {
+                setUser(updatedUser); // Update user context with potentially updated data from server
                 toast({
                     title: 'Success',
                     description: 'Profile updated successfully',
@@ -150,13 +179,14 @@ const Profile = () => {
             } else {
                 toast({
                     title: 'Error',
-                    description: 'Error updating profile',
+                    description: updatedUser.error || 'Error updating profile',
                     status: 'error',
                     duration: 3000,
                     isClosable: true
                 });
             }
-        } catch {
+        } catch (error) {
+            console.error('Profile update error:', error);
             toast({
                 title: 'Error',
                 description: 'Error updating profile',
@@ -170,8 +200,15 @@ const Profile = () => {
     };
 
     const handleDeleteContent = async (contentId) => {
-        if (window.confirm('Are you sure you want to delete this content?')) {
-            setContentLoading(true);
+        if (
+            window.confirm(
+                'Are you sure you want to delete this generated content? This action cannot be undone.'
+            )
+        ) {
+            // Optimistically remove from UI first
+            const originalContentList = [...contentList];
+            setContentList((prevList) => prevList.filter((content) => content._id !== contentId));
+
             try {
                 const response = await fetch(`${API_URL}/api/profile/content/${contentId}`, {
                     method: 'DELETE',
@@ -180,31 +217,36 @@ const Profile = () => {
                     }
                 });
                 if (response.ok) {
-                    setContentList(contentList.filter((content) => content._id !== contentId));
                     toast({
                         title: 'Content deleted',
                         status: 'success',
                         duration: 3000,
                         isClosable: true
                     });
+                    // Content already removed optimistically
                 } else {
+                    // Revert UI changes if deletion failed
+                    setContentList(originalContentList);
+                    const errorData = await response.json();
                     toast({
                         title: 'Error deleting content',
+                        description: errorData.message || 'Failed to delete content on the server.',
                         status: 'error',
                         duration: 3000,
                         isClosable: true
                     });
                 }
             } catch (error) {
+                // Revert UI changes if network error occurred
+                setContentList(originalContentList);
                 console.error('Error deleting content:', error);
                 toast({
                     title: 'Error deleting content',
+                    description: 'An unexpected error occurred.',
                     status: 'error',
                     duration: 3000,
                     isClosable: true
                 });
-            } finally {
-                setContentLoading(false);
             }
         }
     };
@@ -213,301 +255,408 @@ const Profile = () => {
         setExpandedContentId(expandedContentId === contentId ? null : contentId);
     };
 
+    if (!user && isLoading) {
+        return (
+            <Center h="80vh">
+                <Spinner size="xl" />
+            </Center>
+        );
+    }
+
+    if (!user && !isLoading) {
+        // Could redirect to login or show a message
+        return (
+            <Container maxW="container.lg" py={8}>
+                <Text>Please log in to view your profile.</Text>
+            </Container>
+        );
+    }
+
     return (
         <Container maxW="container.lg" py={8}>
-            <Card>
-                <CardBody>
-                    <VStack spacing={8}>
-                        <Box w="100%">
-                            <Stack direction="row" justify="space-between" align="center" mb={4}>
-                                <Text fontSize="xl">Subscription</Text>
-                                <Badge
-                                    colorScheme={
+            <VStack spacing={8} align="stretch">
+                {/* Profile Information Card */}
+                <Card bg={cardBg} shadow="md">
+                    <CardBody>
+                        <Heading size="lg" mb={6}>
+                            My Profile
+                        </Heading>
+                        <VStack spacing={6} align="stretch">
+                            {/* Subscription Section */}
+                            <Box borderBottomWidth="1px" pb={6} borderColor={borderColor}>
+                                <Stack
+                                    direction={{ base: 'column', md: 'row' }}
+                                    justify="space-between"
+                                    align="center"
+                                    spacing={4}
+                                >
+                                    <Heading size="md">Subscription</Heading>
+                                    <Badge
+                                        fontSize="md"
+                                        px={3}
+                                        py={1}
+                                        borderRadius="full"
+                                        colorScheme={
+                                            user?.subscriptionStatus === 'active' ||
+                                            user?.subscriptionStatus === 'trialing'
+                                                ? 'green'
+                                                : 'gray'
+                                        }
+                                    >
+                                        {user?.subscriptionStatus === 'active' ||
+                                        user?.subscriptionStatus === 'trialing'
+                                            ? 'Premium'
+                                            : 'Free'}
+                                    </Badge>
+                                </Stack>
+                                <Box mt={4}>
+                                    {!(
                                         user?.subscriptionStatus === 'active' ||
                                         user?.subscriptionStatus === 'trialing'
-                                            ? 'green'
-                                            : 'gray'
-                                    }
-                                >
-                                    {user?.subscriptionStatus === 'active' ||
-                                    user?.subscriptionStatus === 'trialing'
-                                        ? 'Premium'
-                                        : 'Free'}
-                                </Badge>
-                            </Stack>
-                            {!(
-                                user?.subscriptionStatus === 'active' ||
-                                user?.subscriptionStatus === 'trialing'
-                            ) ? (
-                                <Link href="https://buy.stripe.com/00gdSPetHeEfgUg9AI" isExternal>
-                                    <Button disabled={!user} colorScheme="orange">
-                                        Upgrade to Premium ($7.99/mo)
-                                    </Button>
-                                </Link>
-                            ) : (
-                                <Link
-                                    href={
-                                        'https://billing.stripe.com/p/login/9AQ8zd8ZL79E51e000?prefilled_email=' +
-                                        user?.email
-                                    }
-                                    target="_blank"
-                                    rel="noopener"
-                                >
-                                    <Button colorScheme="purple" mt={1} ml={1}>
-                                        Customer Portal
-                                    </Button>
-                                </Link>
-                            )}
-                        </Box>
-                        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-                            <VStack spacing={6} align="stretch">
-                                <Heading size="md">Basic Information</Heading>
-                                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-                                    <FormControl>
-                                        <FormLabel>First Name</FormLabel>
-                                        <Input
-                                            value={user?.firstName || ''}
-                                            onChange={(e) =>
-                                                handleBasicChange('firstName', e.target.value)
-                                            }
-                                        />
-                                    </FormControl>
-                                    <FormControl>
-                                        <FormLabel>Last Name</FormLabel>
-                                        <Input
-                                            value={user?.lastName || ''}
-                                            onChange={(e) =>
-                                                handleBasicChange('lastName', e.target.value)
-                                            }
-                                        />
-                                    </FormControl>
-                                    <FormControl>
-                                        <FormLabel>Email</FormLabel>
-                                        <Input value={user?.email || ''} isReadOnly />
-                                    </FormControl>
-                                </SimpleGrid>
-                            </VStack>
-                            <VStack spacing={6} align="stretch" mt={8}>
-                                <Heading size="md">Research Preferences</Heading>
-                                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-                                    <FormControl>
-                                        <FormLabel>Field of Research</FormLabel>
-                                        <Input
-                                            value={user?.researchPreferences?.field || ''}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    'researchPreferences',
-                                                    'field',
-                                                    e.target.value
-                                                )
-                                            }
-                                        />
-                                    </FormControl>
-                                    <FormControl>
-                                        <FormLabel>Preferred Data Sources</FormLabel>
-                                        <Input
-                                            value={user?.researchPreferences?.dataSources || ''}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    'researchPreferences',
-                                                    'dataSources',
-                                                    e.target.value
-                                                )
-                                            }
-                                        />
-                                    </FormControl>
-                                    <FormControl>
-                                        <FormLabel>Level of AI Assistance</FormLabel>
-                                        <Select
-                                            value={user?.researchPreferences?.aiAssistance || ''}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    'researchPreferences',
-                                                    'aiAssistance',
-                                                    e.target.value
-                                                )
-                                            }
+                                    ) ? (
+                                        <Link
+                                            href={process.env.VITE_STRIPE_PREMIUM_LINK || '#'}
+                                            isExternal
+                                            _hover={{ textDecoration: 'none' }}
                                         >
-                                            <option value="">Select level</option>
-                                            <option value="minimal">Minimal</option>
-                                            <option value="moderate">Moderate</option>
-                                            <option value="full">Full</option>
-                                        </Select>
-                                    </FormControl>
-                                </SimpleGrid>
-                            </VStack>
-                            <VStack spacing={6} align="stretch" mt={8}>
-                                <Heading size="md">Presentation Settings</Heading>
-                                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-                                    <FormControl>
-                                        <FormLabel>Default Slide Layout</FormLabel>
-                                        <Select
-                                            value={user?.presentationSettings?.slideLayout || ''}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    'presentationSettings',
-                                                    'slideLayout',
-                                                    e.target.value
-                                                )
+                                            <Button
+                                                colorScheme="orange"
+                                                w={{ base: 'full', md: 'auto' }}
+                                            >
+                                                Upgrade to Premium
+                                                <Icon as={ExternalLinkIcon} ml={2} />
+                                            </Button>
+                                        </Link>
+                                    ) : (
+                                        <Link
+                                            href={
+                                                process.env.VITE_STRIPE_PORTAL_LINK && user?.email
+                                                    ? `${process.env.VITE_STRIPE_PORTAL_LINK}?prefilled_email=${encodeURIComponent(user.email)}`
+                                                    : '#'
                                             }
+                                            isExternal
+                                            _hover={{ textDecoration: 'none' }}
                                         >
-                                            <option value="">Select layout</option>
-                                            <option value="Default">Default</option>
-                                            <option value="Title Slide">Title Slide</option>
-                                            <option value="Bullet List">Bullet List</option>
-                                            <option value="Image Focused">Image Focused</option>
-                                        </Select>
-                                    </FormControl>
-                                    <FormControl>
-                                        <FormLabel>Theme</FormLabel>
-                                        <Select
-                                            value={user?.presentationSettings?.theme || ''}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    'presentationSettings',
-                                                    'theme',
-                                                    e.target.value
-                                                )
-                                            }
-                                        >
-                                            <option value="">Select theme</option>
-                                            <option value="Light">Light</option>
-                                            <option value="Dark">Dark</option>
-                                            <option value="Auto">Auto</option>
-                                            <option value="Primary Blue">Primary Blue</option>
-                                            <option value="Secondary Blue">Secondary Blue</option>
-                                            <option value="Vibrant Accent">Vibrant Accent</option>
-                                            <option value="Olive Green">Olive Green</option>
-                                            <option value="Sunset">Sunset</option>
-                                        </Select>
-                                    </FormControl>
-                                </SimpleGrid>
-                            </VStack>
-
-                            <Box mt={8}>
-                                <Button
-                                    type="submit"
-                                    colorScheme="blue"
-                                    isLoading={isLoading}
-                                    width="100%"
-                                >
-                                    Save
-                                </Button>
+                                            <Button
+                                                colorScheme="purple"
+                                                w={{ base: 'full', md: 'auto' }}
+                                            >
+                                                Manage Subscription
+                                                <Icon as={ExternalLinkIcon} ml={2} />
+                                            </Button>
+                                        </Link>
+                                    )}
+                                </Box>
                             </Box>
-                        </form>
 
-                        <VStack spacing={4} width="100%" mt={8} align="stretch">
-                            <Heading size="md">Generated Content</Heading>
+                            {/* Basic Information Form */}
+                            <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                                <VStack spacing={6} align="stretch">
+                                    <Heading size="md">Basic Information</Heading>
+                                    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                                        <FormControl>
+                                            <FormLabel>First Name</FormLabel>
+                                            <Input
+                                                value={user?.firstName || ''}
+                                                onChange={(e) =>
+                                                    handleBasicChange('firstName', e.target.value)
+                                                }
+                                            />
+                                        </FormControl>
+                                        <FormControl>
+                                            <FormLabel>Last Name</FormLabel>
+                                            <Input
+                                                value={user?.lastName || ''}
+                                                onChange={(e) =>
+                                                    handleBasicChange('lastName', e.target.value)
+                                                }
+                                            />
+                                        </FormControl>
+                                        <FormControl id="email" gridColumn={{ md: '1 / span 2' }}>
+                                            <FormLabel>Email</FormLabel>
+                                            <Input
+                                                value={user?.email || ''}
+                                                isReadOnly
+                                                _disabled={{ opacity: 0.7, cursor: 'not-allowed' }}
+                                            />
+                                        </FormControl>
+                                    </SimpleGrid>
+                                    <Box pt={2}>
+                                        <Button
+                                            type="submit"
+                                            colorScheme="blue"
+                                            isLoading={isLoading}
+                                            w={{ base: 'full', md: 'auto' }}
+                                        >
+                                            Save Changes
+                                        </Button>
+                                    </Box>
+                                </VStack>
+                            </form>
+                        </VStack>
+                    </CardBody>
+                </Card>
 
-                            <InputGroup mb={4}>
-                                <InputLeftElement
-                                    pointerEvents="none"
-                                    children={<Icon as={Search2Icon} color="gray.300" />}
-                                />
+                {/* Generated Content Card */}
+                <Card bg={cardBg} shadow="md">
+                    <CardBody>
+                        <VStack spacing={4} width="100%" align="stretch">
+                            <Heading size="lg" mb={2}>
+                                Generated Content History
+                            </Heading>
+
+                            <InputGroup>
+                                <InputLeftElement pointerEvents="none" color="gray.400">
+                                    <Search2Icon />
+                                </InputLeftElement>
+
                                 <Input
                                     type="text"
-                                    placeholder="Search topics or platforms"
+                                    placeholder="Search history by topic, platform, goal, tone, or content..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </InputGroup>
 
                             {contentLoading ? (
-                                <Text>Loading generated content...</Text>
+                                <Center py={10}>
+                                    <Spinner size="lg" />
+                                    <Text ml={4}>Loading generated content...</Text>
+                                </Center>
                             ) : filteredContentList.length === 0 ? (
-                                <Text>No content generated yet.</Text>
+                                <Center py={10}>
+                                    <Text color="gray.500">
+                                        {contentList.length === 0
+                                            ? "You haven't generated any content yet."
+                                            : 'No content matches your search.'}
+                                    </Text>
+                                </Center>
                             ) : (
-                                <Table variant="simple">
-                                    <Thead>
-                                        <Tr>
-                                            <Th>Topic</Th>
-                                            <Th>Platform</Th>
-                                            <Th>Created</Th>
-                                            <Th>Actions</Th>
-                                        </Tr>
-                                    </Thead>
-                                    <Tbody>
-                                        {filteredContentList.map((content) => (
-                                            <Tr key={content._id}>
-                                                <Td>{content.topic}</Td>
-                                                <Td>{content.platform}</Td>
-                                                <Td>
-                                                    {formatDistanceToNow(
-                                                        new Date(content.createdAt),
-                                                        {
-                                                            addSuffix: true
-                                                        }
-                                                    )}
-                                                </Td>
-                                                <Td>
-                                                    <Stack direction="row" spacing={2}>
-                                                        <IconButton
-                                                            icon={<ViewIcon />}
-                                                            aria-label="View Content"
-                                                            size="sm"
-                                                            onClick={() =>
-                                                                toggleContentExpansion(content._id)
-                                                            }
-                                                        />
-                                                        <IconButton
-                                                            icon={<DeleteIcon />}
-                                                            aria-label="Delete Content"
-                                                            size="sm"
-                                                            colorScheme="red"
-                                                            onClick={() =>
-                                                                handleDeleteContent(content._id)
-                                                            }
-                                                        />
-                                                    </Stack>
-                                                </Td>
+                                <Box overflowX="auto">
+                                    <Table variant="simple" size="md">
+                                        <Thead bg={tableHeaderBg}>
+                                            <Tr>
+                                                <Th>Topic</Th>
+                                                <Th>Platform</Th>
+                                                <Th>Goal</Th>
+                                                <Th>Tone</Th>
+                                                <Th>Created</Th>
+                                                <Th>Actions</Th>
                                             </Tr>
-                                        ))}
-                                    </Tbody>
-                                </Table>
+                                        </Thead>
+                                        <Tbody>
+                                            {filteredContentList.map((content) => (
+                                                <>
+                                                    <Tr key={content._id}>
+                                                        <Td
+                                                            maxW="200px"
+                                                            whiteSpace="normal"
+                                                            wordBreak="break-word"
+                                                        >
+                                                            {content.topic || '-'}
+                                                        </Td>
+                                                        <Td>
+                                                            <Badge
+                                                                colorScheme={getPlatformColorScheme(
+                                                                    content.platform
+                                                                )}
+                                                            >
+                                                                {content.platform || '-'}
+                                                            </Badge>
+                                                        </Td>
+                                                        <Td>{content.goal || '-'}</Td>
+                                                        <Td>{content.tone || '-'}</Td>
+                                                        <Td whiteSpace="nowrap">
+                                                            {content.createdAt
+                                                                ? formatDistanceToNow(
+                                                                      new Date(content.createdAt),
+                                                                      { addSuffix: true }
+                                                                  )
+                                                                : '-'}
+                                                        </Td>
+                                                        <Td>
+                                                            <Stack direction="row" spacing={2}>
+                                                                <IconButton
+                                                                    icon={<ViewIcon />}
+                                                                    aria-label="View Content Details"
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={() =>
+                                                                        toggleContentExpansion(
+                                                                            content._id
+                                                                        )
+                                                                    }
+                                                                    isActive={
+                                                                        expandedContentId ===
+                                                                        content._id
+                                                                    }
+                                                                />
+                                                                <IconButton
+                                                                    icon={<DeleteIcon />}
+                                                                    aria-label="Delete Content"
+                                                                    size="sm"
+                                                                    colorScheme="red"
+                                                                    variant="outline"
+                                                                    onClick={() =>
+                                                                        handleDeleteContent(
+                                                                            content._id
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </Stack>
+                                                        </Td>
+                                                    </Tr>
+                                                    {/* Collapsible Row for Details */}
+                                                    <Tr key={`${content._id}-details`} p={0} m={0}>
+                                                        <Td colSpan={6} p={0} m={0} border="none">
+                                                            <Collapse
+                                                                in={
+                                                                    expandedContentId ===
+                                                                    content._id
+                                                                }
+                                                                animateOpacity
+                                                                style={{ width: '100%' }}
+                                                            >
+                                                                <Box
+                                                                    p={4}
+                                                                    bg={detailCardBg}
+                                                                    borderTopWidth="1px"
+                                                                    borderColor={borderColor}
+                                                                >
+                                                                    <VStack
+                                                                        align="start"
+                                                                        spacing={4}
+                                                                    >
+                                                                        <Heading size="sm">
+                                                                            Generated Options
+                                                                        </Heading>
+                                                                        {content.contentOptions &&
+                                                                        content.contentOptions
+                                                                            .length > 0 ? (
+                                                                            content.contentOptions.map(
+                                                                                (option, index) => (
+                                                                                    <Box
+                                                                                        key={index}
+                                                                                        borderWidth="1px"
+                                                                                        borderColor={
+                                                                                            borderColor
+                                                                                        }
+                                                                                        borderRadius="md"
+                                                                                        p={4}
+                                                                                        width="100%"
+                                                                                        bg={cardBg}
+                                                                                    >
+                                                                                        <Text
+                                                                                            fontWeight="bold"
+                                                                                            mb={2}
+                                                                                        >
+                                                                                            Option{' '}
+                                                                                            {index +
+                                                                                                1}
+                                                                                        </Text>
+                                                                                        {option.imageUrl && (
+                                                                                            <Image
+                                                                                                src={
+                                                                                                    option.imageUrl
+                                                                                                }
+                                                                                                alt={`Generated image for ${content.topic}`}
+                                                                                                maxH="200px"
+                                                                                                mb={
+                                                                                                    2
+                                                                                                }
+                                                                                                borderRadius="md"
+                                                                                                objectFit="cover"
+                                                                                            />
+                                                                                        )}
+                                                                                        <Text
+                                                                                            mt={2}
+                                                                                            whiteSpace="pre-wrap"
+                                                                                        >
+                                                                                            <strong>
+                                                                                                Text:
+                                                                                            </strong>{' '}
+                                                                                            {
+                                                                                                option.text
+                                                                                            }
+                                                                                        </Text>
+                                                                                        <Text
+                                                                                            mt={2}
+                                                                                        >
+                                                                                            <strong>
+                                                                                                Hashtags:
+                                                                                            </strong>{' '}
+                                                                                            {
+                                                                                                option.hashtags
+                                                                                            }
+                                                                                        </Text>
+                                                                                        <Text
+                                                                                            mt={2}
+                                                                                        >
+                                                                                            <strong>
+                                                                                                Alt
+                                                                                                Text:
+                                                                                            </strong>{' '}
+                                                                                            {
+                                                                                                option.altText
+                                                                                            }
+                                                                                        </Text>
+                                                                                    </Box>
+                                                                                )
+                                                                            )
+                                                                        ) : (
+                                                                            <Text>
+                                                                                No content options
+                                                                                available for this
+                                                                                item.
+                                                                            </Text>
+                                                                        )}
+                                                                        <Text
+                                                                            fontSize="xs"
+                                                                            color="gray.500"
+                                                                        >
+                                                                            Generated on:{' '}
+                                                                            {content.createdAt
+                                                                                ? new Date(
+                                                                                      content.createdAt
+                                                                                  ).toLocaleString()
+                                                                                : 'N/A'}
+                                                                        </Text>
+                                                                    </VStack>
+                                                                </Box>
+                                                            </Collapse>
+                                                        </Td>
+                                                    </Tr>
+                                                </>
+                                            ))}
+                                        </Tbody>
+                                    </Table>
+                                </Box>
                             )}
                         </VStack>
-                        {filteredContentList.map((content) => (
-                            <Collapse
-                                key={content._id}
-                                in={expandedContentId === content._id}
-                                animateOpacity
-                            >
-                                <Card mt={4} boxShadow="sm">
-                                    <CardBody>
-                                        <VStack align="start" spacing={4}>
-                                            <Heading size="sm">Content Options</Heading>
-                                            {content.contentOptions.map((option, index) => (
-                                                <Box
-                                                    key={index}
-                                                    border="1px solid"
-                                                    borderColor="gray.200"
-                                                    borderRadius="md"
-                                                    p={4}
-                                                    mb={2}
-                                                    width="100%"
-                                                >
-                                                    <Text fontWeight="bold">
-                                                        Option {index + 1}
-                                                    </Text>
-                                                    <Text mt={2}>Text: {option.text}</Text>
-                                                    <Text mt={2}>Hashtags: {option.hashtags}</Text>
-                                                    <Text mt={2}>Alt Text: {option.altText}</Text>
-                                                </Box>
-                                            ))}
-                                            <Text fontSize="sm" color="gray.500">
-                                                Created:{' '}
-                                                {new Date(content.createdAt).toLocaleString()}
-                                            </Text>
-                                        </VStack>
-                                    </CardBody>
-                                </Card>
-                            </Collapse>
-                        ))}
-                    </VStack>
-                </CardBody>
-            </Card>
+                    </CardBody>
+                </Card>
+            </VStack>
         </Container>
     );
+};
+
+// Helper function to get color scheme based on platform
+const getPlatformColorScheme = (platform) => {
+    const lowerPlatform = platform?.toLowerCase();
+    switch (lowerPlatform) {
+        case 'instagram':
+            return 'pink';
+        case 'facebook':
+            return 'facebook';
+        case 'twitter':
+            return 'twitter';
+        case 'linkedin':
+            return 'linkedin';
+        case 'pinterest':
+            return 'red';
+        default:
+            return 'gray';
+    }
 };
 
 export default Profile;

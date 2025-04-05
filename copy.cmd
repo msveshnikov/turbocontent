@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 set "REMOTE_USER=ubuntu"
-set "REMOTE_HOST=TurbocontentResearch.pro"
+set "REMOTE_HOST=Turbocontent.art"
 set "REMOTE_DIR=/home/ubuntu"
 
 echo Starting export of MongoDB collections...
