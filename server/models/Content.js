@@ -6,10 +6,6 @@ const ContentSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-        title: {
-            type: String,
-            required: true
-        },
         topic: {
             type: String,
             required: true
@@ -26,14 +22,10 @@ const ContentSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        contentOptions: [
-            {
-                text: String,
-                hashtags: String,
-                altText: String,
-                image: String
-            }
-        ],
+        content: {
+            type: String,
+            required: true
+        },
         isPrivate: {
             type: Boolean,
             default: false

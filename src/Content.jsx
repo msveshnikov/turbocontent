@@ -146,7 +146,6 @@ function Content() {
                 </Button>
             </VStack>
 
-            {/* Generated Content Display */}
             {generatedContent && (
                 <Box mt={8}>
                     <Heading size="md" mb={4}>

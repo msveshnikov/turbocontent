@@ -37,12 +37,12 @@ export const convertImage = async (imageBuffer) => {
     const outputPath = join(MEDIA_FOLDER, output);
     try {
         await sharp(imageBuffer)
-            .resize(1200, 675, {
+            .resize(800, 500, {
                 fit: 'cover',
                 position: 'center'
             })
             .rotate()
-            .jpeg({ quality: 90 })
+            .jpeg({ quality: 95 })
             .toFile(outputPath);
         return output;
     } catch (error) {

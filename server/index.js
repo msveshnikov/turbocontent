@@ -13,7 +13,7 @@ import Feedback from './models/Feedback.js';
 import Content from './models/Content.js';
 import userRoutes from './user.js';
 import adminRoutes from './admin.js';
-import { authenticateTokenOptional, authenticateToken } from './middleware/auth.js';
+import { authenticateTokenOptional } from './middleware/auth.js';
 import { getTextImageContent } from './gemini.js';
 
 dotenv.config();
@@ -30,12 +30,7 @@ app.use(express.json({ limit: '15mb' }));
 const metricsMiddleware = promBundle({
     includeMethod: true,
     includePath: true,
-    includeStatusCode: true,
-    customLabels: { model: 'No' },
-    transformLabels: (labels, req) => {
-        labels.model = req?.body?.model ?? 'No';
-        return labels;
-    }
+    includeStatusCode: true
 });
 app.use(metricsMiddleware);
 app.use(cors());
@@ -75,7 +70,7 @@ app.post('/api/feedback', authenticateTokenOptional, async (req, res) => {
     }
 });
 
-app.post('/api/generate-content', async (req, res) => {
+app.post('/api/generate-content', authenticateTokenOptional, async (req, res) => {
     try {
         const { topic, goal, platform, tone } = req.body;
 
@@ -93,52 +88,41 @@ app.post('/api/generate-content', async (req, res) => {
             Post option should include:
             - Engaging text optimized for the platform.
             - Relevant images and hashtags.
-            
+
             Return the response as a markdown`;
 
         let aiResponse;
-        try {
-            aiResponse = await getTextImageContent(prompt);
-        } catch (aiError) {
-            console.error('AI generation failed:', aiError);
+        aiResponse = await getTextImageContent(prompt);
+
+        if (!aiResponse) {
             return res
                 .status(500)
-                .json({ error: 'AI content generation failed', details: aiError.message });
+                .json({ error: 'AI content generation failed: No response received' });
         }
 
-        res.status(200).json({ content: aiResponse });
+        try {
+            const newContent = new Content({
+                userId: req.user?.id,
+                topic,
+                goal,
+                platform,
+                tone,
+                content: aiResponse,
+                model: 'Gemini',
+                isPrivate: false
+            });
+
+            const savedContent = await newContent.save();
+            return res.status(200).json({ content: aiResponse, savedContent: savedContent });
+        } catch (saveError) {
+            console.error('Error auto-saving content:', saveError);
+            return res
+                .status(200)
+                .json({ content: aiResponse, saveError: 'Failed to auto-save content' });
+        }
     } catch (error) {
         console.error('Error processing generate-content request:', error);
         res.status(500).json({ error: 'Failed to generate content', details: error.message });
-    }
-});
-
-app.post('/api/save-content', authenticateToken, async (req, res) => {
-    try {
-        const { topic, goal, platform, tone, contentOptions, model, isPrivate = false } = req.body;
-
-        if (!topic || !goal || !platform || !tone || !contentOptions) {
-            return res.status(400).json({
-                error: 'Missing required parameters: topic, goal, platform, tone, and contentOptions are required.'
-            });
-        }
-
-        const newContent = new Content({
-            userId: req.user.id,
-            topic,
-            goal,
-            platform,
-            tone,
-            contentOptions,
-            model,
-            isPrivate
-        });
-
-        const savedContent = await newContent.save();
-        res.status(201).json(savedContent);
-    } catch (error) {
-        console.error('Error saving content:', error);
-        res.status(500).json({ error: 'Failed to save content', details: error.message });
     }
 });
 
