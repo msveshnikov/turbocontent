@@ -120,6 +120,11 @@ function Content() {
                         <option value="twitter">Twitter</option>
                         <option value="linkedin">LinkedIn</option>
                         <option value="pinterest">Pinterest</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="snapchat">Snapchat</option>
+                        <option value="medium">Medium</option>
+                        <option value="reddit">Reddit</option>
                     </Select>
                 </FormControl>
                 <FormControl id="tone" isRequired>
@@ -134,6 +139,11 @@ function Content() {
                         <option value="inspiring">Inspiring</option>
                         <option value="humorous">Humorous</option>
                         <option value="serious">Serious</option>
+                        <option value="casual">Casual</option>
+                        <option value="professional">Professional</option>
+                        <option value="enthusiastic">Enthusiastic</option>
+                        <option value="persuasive">Persuasive</option>
+                        <option value="conversational">Conversational</option>
                     </Select>
                 </FormControl>
                 <Button
