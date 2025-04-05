@@ -24,10 +24,13 @@ import {
     Th,
     Td,
     IconButton,
-    Collapse
+    Collapse,
+    InputGroup,
+    InputLeftElement,
+    Icon
 } from '@chakra-ui/react';
 import { API_URL, UserContext } from './App';
-import { DeleteIcon, ViewIcon } from '@chakra-ui/icons';
+import { DeleteIcon, ViewIcon, Search2Icon } from '@chakra-ui/icons';
 import { formatDistanceToNow } from 'date-fns';
 
 const Profile = () => {
@@ -37,6 +40,8 @@ const Profile = () => {
     const [contentList, setContentList] = useState([]);
     const [contentLoading, setContentLoading] = useState(true);
     const [expandedContentId, setExpandedContentId] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredContentList, setFilteredContentList] = useState([]);
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -75,6 +80,28 @@ const Profile = () => {
 
         fetchContent();
     }, [toast]);
+
+    useEffect(() => {
+        const filterContent = () => {
+            if (!searchQuery) {
+                setFilteredContentList([...contentList]);
+                return;
+            }
+            const filtered = contentList.filter((content) => {
+                return (
+                    content.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    content.platform.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+            });
+            setFilteredContentList(filtered);
+        };
+
+        filterContent();
+    }, [searchQuery, contentList]);
+
+    useEffect(() => {
+        setFilteredContentList([...contentList]);
+    }, [contentList]);
 
     const handleChange = (section, field, value) => {
         setUser((prev) => ({
@@ -371,9 +398,23 @@ const Profile = () => {
 
                         <VStack spacing={4} width="100%" mt={8} align="stretch">
                             <Heading size="md">Generated Content</Heading>
+
+                            <InputGroup mb={4}>
+                                <InputLeftElement
+                                    pointerEvents="none"
+                                    children={<Icon as={Search2Icon} color="gray.300" />}
+                                />
+                                <Input
+                                    type="text"
+                                    placeholder="Search topics or platforms"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </InputGroup>
+
                             {contentLoading ? (
                                 <Text>Loading generated content...</Text>
-                            ) : contentList.length === 0 ? (
+                            ) : filteredContentList.length === 0 ? (
                                 <Text>No content generated yet.</Text>
                             ) : (
                                 <Table variant="simple">
@@ -386,7 +427,7 @@ const Profile = () => {
                                         </Tr>
                                     </Thead>
                                     <Tbody>
-                                        {contentList.map((content) => (
+                                        {filteredContentList.map((content) => (
                                             <Tr key={content._id}>
                                                 <Td>{content.topic}</Td>
                                                 <Td>{content.platform}</Td>
@@ -425,7 +466,7 @@ const Profile = () => {
                                 </Table>
                             )}
                         </VStack>
-                        {contentList.map((content) => (
+                        {filteredContentList.map((content) => (
                             <Collapse
                                 key={content._id}
                                 in={expandedContentId === content._id}
