@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import {
     Box,
     Button,
@@ -16,14 +16,65 @@ import {
     SimpleGrid,
     Stack,
     Badge,
-    Link
+    Link,
+    Table,
+    Thead,
+    Tbody,
+    Tr,
+    Th,
+    Td,
+    IconButton,
+    Collapse
 } from '@chakra-ui/react';
 import { API_URL, UserContext } from './App';
+import { DeleteIcon, ViewIcon } from '@chakra-ui/icons';
+import { formatDistanceToNow } from 'date-fns';
 
 const Profile = () => {
     const { user, setUser } = useContext(UserContext);
     const toast = useToast();
     const [isLoading, setIsLoading] = useState(false);
+    const [contentList, setContentList] = useState([]);
+    const [contentLoading, setContentLoading] = useState(true);
+    const [expandedContentId, setExpandedContentId] = useState(null);
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            setContentLoading(true);
+            try {
+                const response = await fetch(`${API_URL}/api/profile/content`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setContentList(data);
+                } else {
+                    toast({
+                        title: 'Error loading content',
+                        description: 'Failed to load generated content.',
+                        status: 'error',
+                        duration: 3000,
+                        isClosable: true
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching content:', error);
+                toast({
+                    title: 'Error loading content',
+                    description: 'Failed to load generated content.',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true
+                });
+            } finally {
+                setContentLoading(false);
+            }
+        };
+
+        fetchContent();
+    }, [toast]);
 
     const handleChange = (section, field, value) => {
         setUser((prev) => ({
@@ -66,14 +117,16 @@ const Profile = () => {
                     title: 'Success',
                     description: 'Profile updated successfully',
                     status: 'success',
-                    duration: 3000
+                    duration: 3000,
+                    isClosable: true
                 });
             } else {
                 toast({
                     title: 'Error',
                     description: 'Error updating profile',
                     status: 'error',
-                    duration: 3000
+                    duration: 3000,
+                    isClosable: true
                 });
             }
         } catch {
@@ -81,11 +134,56 @@ const Profile = () => {
                 title: 'Error',
                 description: 'Error updating profile',
                 status: 'error',
-                duration: 3000
+                duration: 3000,
+                isClosable: true
             });
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleDeleteContent = async (contentId) => {
+        if (window.confirm('Are you sure you want to delete this content?')) {
+            setContentLoading(true);
+            try {
+                const response = await fetch(`${API_URL}/api/profile/content/${contentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                if (response.ok) {
+                    setContentList(contentList.filter((content) => content._id !== contentId));
+                    toast({
+                        title: 'Content deleted',
+                        status: 'success',
+                        duration: 3000,
+                        isClosable: true
+                    });
+                } else {
+                    toast({
+                        title: 'Error deleting content',
+                        status: 'error',
+                        duration: 3000,
+                        isClosable: true
+                    });
+                }
+            } catch (error) {
+                console.error('Error deleting content:', error);
+                toast({
+                    title: 'Error deleting content',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true
+                });
+            } finally {
+                setContentLoading(false);
+            }
+        }
+    };
+
+    const toggleContentExpansion = (contentId) => {
+        setExpandedContentId(expandedContentId === contentId ? null : contentId);
     };
 
     return (
@@ -270,9 +368,100 @@ const Profile = () => {
                                 </Button>
                             </Box>
                         </form>
-                        <VStack spacing={4} width="100%" mt={8}>
-                            <Heading size="md">Presentations</Heading>
+
+                        <VStack spacing={4} width="100%" mt={8} align="stretch">
+                            <Heading size="md">Generated Content</Heading>
+                            {contentLoading ? (
+                                <Text>Loading generated content...</Text>
+                            ) : contentList.length === 0 ? (
+                                <Text>No content generated yet.</Text>
+                            ) : (
+                                <Table variant="simple">
+                                    <Thead>
+                                        <Tr>
+                                            <Th>Topic</Th>
+                                            <Th>Platform</Th>
+                                            <Th>Created</Th>
+                                            <Th>Actions</Th>
+                                        </Tr>
+                                    </Thead>
+                                    <Tbody>
+                                        {contentList.map((content) => (
+                                            <Tr key={content._id}>
+                                                <Td>{content.topic}</Td>
+                                                <Td>{content.platform}</Td>
+                                                <Td>
+                                                    {formatDistanceToNow(
+                                                        new Date(content.createdAt),
+                                                        {
+                                                            addSuffix: true
+                                                        }
+                                                    )}
+                                                </Td>
+                                                <Td>
+                                                    <Stack direction="row" spacing={2}>
+                                                        <IconButton
+                                                            icon={<ViewIcon />}
+                                                            aria-label="View Content"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                toggleContentExpansion(content._id)
+                                                            }
+                                                        />
+                                                        <IconButton
+                                                            icon={<DeleteIcon />}
+                                                            aria-label="Delete Content"
+                                                            size="sm"
+                                                            colorScheme="red"
+                                                            onClick={() =>
+                                                                handleDeleteContent(content._id)
+                                                            }
+                                                        />
+                                                    </Stack>
+                                                </Td>
+                                            </Tr>
+                                        ))}
+                                    </Tbody>
+                                </Table>
+                            )}
                         </VStack>
+                        {contentList.map((content) => (
+                            <Collapse
+                                key={content._id}
+                                in={expandedContentId === content._id}
+                                animateOpacity
+                            >
+                                <Card mt={4} boxShadow="sm">
+                                    <CardBody>
+                                        <VStack align="start" spacing={4}>
+                                            <Heading size="sm">Content Options</Heading>
+                                            {content.contentOptions.map((option, index) => (
+                                                <Box
+                                                    key={index}
+                                                    border="1px solid"
+                                                    borderColor="gray.200"
+                                                    borderRadius="md"
+                                                    p={4}
+                                                    mb={2}
+                                                    width="100%"
+                                                >
+                                                    <Text fontWeight="bold">
+                                                        Option {index + 1}
+                                                    </Text>
+                                                    <Text mt={2}>Text: {option.text}</Text>
+                                                    <Text mt={2}>Hashtags: {option.hashtags}</Text>
+                                                    <Text mt={2}>Alt Text: {option.altText}</Text>
+                                                </Box>
+                                            ))}
+                                            <Text fontSize="sm" color="gray.500">
+                                                Created:{' '}
+                                                {new Date(content.createdAt).toLocaleString()}
+                                            </Text>
+                                        </VStack>
+                                    </CardBody>
+                                </Card>
+                            </Collapse>
+                        ))}
                     </VStack>
                 </CardBody>
             </Card>

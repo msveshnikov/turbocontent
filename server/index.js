@@ -10,9 +10,10 @@ import compression from 'compression';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import Feedback from './models/Feedback.js';
+import Content from './models/Content.js';
 import userRoutes from './user.js';
 import adminRoutes from './admin.js';
-import { authenticateTokenOptional } from './middleware/auth.js';
+import { authenticateTokenOptional, authenticateToken } from './middleware/auth.js';
 import { getTextGemini } from './gemini.js';
 
 dotenv.config();
@@ -63,18 +64,8 @@ const generateAIResponse = async (prompt, model, temperature = 0.7) => {
         case 'gemini-2.0-flash-thinking-exp-01-21':
             return await getTextGemini(prompt, model, temperature);
         default:
-            throw new Error('Invalid model specified');
+            return await getTextGemini(prompt, 'gemini-2.0-pro-exp-02-05', temperature);
     }
-};
-
-export const getIpFromRequest = (req) => {
-    let ips = (
-        req.headers['x-real-ip'] ||
-        req.headers['x-forwarded-for'] ||
-        req.connection.remoteAddress ||
-        ''
-    ).split(',');
-    return ips[0].trim();
 };
 
 app.post('/api/feedback', authenticateTokenOptional, async (req, res) => {
@@ -146,6 +137,35 @@ app.post('/api/generate-content', async (req, res) => {
     } catch (error) {
         console.error('Error processing generate-content request:', error);
         res.status(500).json({ error: 'Failed to generate content', details: error.message });
+    }
+});
+
+app.post('/api/save-content', authenticateToken, async (req, res) => {
+    try {
+        const { topic, goal, platform, tone, contentOptions, model, isPrivate = false } = req.body;
+
+        if (!topic || !goal || !platform || !tone || !contentOptions) {
+            return res.status(400).json({
+                error: 'Missing required parameters: topic, goal, platform, tone, and contentOptions are required.'
+            });
+        }
+
+        const newContent = new Content({
+            userId: req.user.id,
+            topic,
+            goal,
+            platform,
+            tone,
+            contentOptions,
+            model,
+            isPrivate
+        });
+
+        const savedContent = await newContent.save();
+        res.status(201).json(savedContent);
+    } catch (error) {
+        console.error('Error saving content:', error);
+        res.status(500).json({ error: 'Failed to save content', details: error.message });
     }
 });
 

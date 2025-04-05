@@ -206,6 +206,4 @@ Turbocontent, leveraging the described project structure.
 
 # TODO
 
-- [ ] Implement detailed UI for `Admin.jsx`.
 - [ ] Flesh out `Profile.jsx` with user settings and content management features.
-- [ ] Add robust error handling and user feedback mechanisms throughout the app.

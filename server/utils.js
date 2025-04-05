@@ -10,7 +10,8 @@ export const enrichMetadata = async (html, slug) => {
 
         const slidesSummary =
             Array.isArray(presentation.slides) && presentation.slides.length
-                ? presentation.slides
+                ? presentation
+                      .slides()
                       .map((slide, i) => `Slide ${i + 1}: ${slide.title || 'Untitled'}`)
                       .join('. ')
                 : '';
@@ -75,4 +76,19 @@ export const enrichMetadata = async (html, slug) => {
     } catch {
         return html;
     }
+};
+
+export const getIpFromRequest = (req) => {
+    let ips = (
+        req.headers['x-real-ip'] ||
+        req.headers['x-forwarded-for'] ||
+        req.connection.remoteAddress ||
+        ''
+    ).split(',');
+    return ips[0].trim();
+};
+
+export const sendErrorResponse = (res, statusCode, message, details = null) => {
+    console.error(`Error Response ${statusCode}: ${message}`, details);
+    return res.status(statusCode).json({ error: message, details });
 };
