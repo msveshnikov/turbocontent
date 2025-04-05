@@ -42,6 +42,11 @@ function Content() {
     const [error, setError] = useState('');
 
     const handleGenerateContent = async () => {
+        if (!topic || !goal || !platform || !tone) {
+            setError('Please fill in all required fields.');
+            return;
+        }
+
         setLoading(true);
         setError('');
         setGeneratedContent('');
