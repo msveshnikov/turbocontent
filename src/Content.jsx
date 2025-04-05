@@ -2,21 +2,35 @@ import {
     Box,
     VStack,
     Heading,
-    Text,
     FormControl,
     FormLabel,
     Input,
     Select,
     Button,
-    Grid,
-    GridItem,
-    Image,
     Alert,
     AlertIcon,
-    Spinner
+    Spinner,
+    Text
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { API_URL } from './App';
+import { unified } from 'unified';
+import markdown from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeStringify from 'rehype-stringify';
+
+export const markdownToJSX = (mdContent) => {
+    const result = unified()
+        .use(markdown)
+        .use(remarkRehype, { allowDangerousHtml: true })
+        .use(rehypeRaw)
+        .use(rehypeSanitize)
+        .use(rehypeStringify)
+        .processSync(mdContent);
+    return result.value;
+};
 
 function Content() {
     const [topic, setTopic] = useState('');
@@ -48,7 +62,7 @@ function Content() {
             }
 
             const data = await response.json();
-            setGeneratedContent(data);
+            setGeneratedContent(data.content);
         } catch (error) {
             console.error('Error generating content:', error);
             if (!error) {
@@ -87,7 +101,6 @@ function Content() {
                         onChange={(e) => setGoal(e.target.value)}
                         placeholder="Select goal"
                     >
-                        <option value="">Select goal</option>
                         <option value="engagement">Engagement</option>
                         <option value="promotion">Promotion</option>
                         <option value="awareness">Awareness</option>
@@ -101,7 +114,6 @@ function Content() {
                         onChange={(e) => setPlatform(e.target.value)}
                         placeholder="Select platform"
                     >
-                        <option value="">Select platform</option>
                         <option value="instagram">Instagram</option>
                         <option value="facebook">Facebook</option>
                         <option value="twitter">Twitter</option>
@@ -116,7 +128,6 @@ function Content() {
                         onChange={(e) => setTone(e.target.value)}
                         placeholder="Select tone"
                     >
-                        <option value="">Select tone</option>
                         <option value="witty">Witty</option>
                         <option value="informative">Informative</option>
                         <option value="inspiring">Inspiring</option>
@@ -136,51 +147,18 @@ function Content() {
             </VStack>
 
             {/* Generated Content Display */}
-            {generatedContent.length > 0 && (
+            {generatedContent && (
                 <Box mt={8}>
                     <Heading size="md" mb={4}>
-                        Generated Content Options
+                        Generated Content
                     </Heading>
-                    <Grid
-                        templateColumns={{
-                            sm: '1fr',
-                            md: 'repeat(auto-fit, minmax(300px, 1fr))'
-                        }}
-                        gap={6}
-                    >
-                        {generatedContent.map((content, index) => (
-                            <GridItem
-                                key={index}
-                                bg="white"
-                                p={4}
-                                shadow="md"
-                                borderWidth="1px"
-                                borderRadius="md"
-                            >
-                                <Image
-                                    src={content.image}
-                                    alt={`Generated Image ${index + 1}`}
-                                    mb={4}
-                                    borderRadius="md"
-                                    fallbackSrc="https://via.placeholder.com/300/F0F0F0/808080?Text=Loading"
-                                />
-                                <Text fontWeight="bold" mb={2}>
-                                    Option {index + 1}
-                                </Text>
-                                <Text mb={2}>{content.text}</Text>
-                                {content.hashtags && (
-                                    <Text fontSize="sm" color="gray.600">
-                                        Hashtags: {content.hashtags}
-                                    </Text>
-                                )}
-                                {content.altText && (
-                                    <Text fontSize="sm" color="gray.600">
-                                        Alt Text: {content.altText}
-                                    </Text>
-                                )}
-                            </GridItem>
-                        ))}
-                    </Grid>
+                    <Box bg="white" p={4} shadow="md" borderWidth="1px" borderRadius="md">
+                        <Text
+                            fontSize="md"
+                            whiteSpace="pre-line"
+                            dangerouslySetInnerHTML={{ __html: markdownToJSX(generatedContent) }}
+                        />
+                    </Box>
                 </Box>
             )}
         </Box>

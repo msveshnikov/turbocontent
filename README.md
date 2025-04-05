@@ -276,5 +276,3 @@ Turbocontent, leveraging the described project structure.
   infographic) and platform-specific content optimization.
 
 # TODO
-
-- generated content is just markdown string with images inside

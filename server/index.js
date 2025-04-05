@@ -106,7 +106,7 @@ app.post('/api/generate-content', async (req, res) => {
                 .json({ error: 'AI content generation failed', details: aiError.message });
         }
 
-        res.status(200).json(aiResponse);
+        res.status(200).json({ content: aiResponse });
     } catch (error) {
         console.error('Error processing generate-content request:', error);
         res.status(500).json({ error: 'Failed to generate content', details: error.message });
