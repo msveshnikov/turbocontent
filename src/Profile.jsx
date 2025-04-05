@@ -599,6 +599,18 @@ const getPlatformColorScheme = (platform) => {
             return 'linkedin';
         case 'pinterest':
             return 'red';
+        case 'youtube':
+            return 'red';
+        case 'tiktok':
+            return 'blackAlpha';
+        case 'snapchat':
+            return 'yellow';
+        case 'twitch':
+            return 'purple';
+        case 'reddit':
+            return 'orange';
+        case 'discord':
+            return 'purple';
         default:
             return 'gray';
     }
