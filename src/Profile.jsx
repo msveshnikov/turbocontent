@@ -29,12 +29,12 @@ import {
     Icon,
     Spinner,
     Center,
-    useColorModeValue,
-    Image
+    useColorModeValue
 } from '@chakra-ui/react';
 import { API_URL, UserContext } from './App';
 import { DeleteIcon, ViewIcon, Search2Icon, ExternalLinkIcon } from '@chakra-ui/icons';
 import { formatDistanceToNow } from 'date-fns';
+import { markdownToJSX } from './Content';
 
 const Profile = () => {
     const { user, setUser } = useContext(UserContext);
@@ -527,89 +527,34 @@ const Profile = () => {
                                                                         align="start"
                                                                         spacing={4}
                                                                     >
-                                                                        <Heading size="sm">
-                                                                            Generated Options
-                                                                        </Heading>
-                                                                        {content.contentOptions &&
-                                                                        content.contentOptions
-                                                                            .length > 0 ? (
-                                                                            content.contentOptions.map(
-                                                                                (option, index) => (
-                                                                                    <Box
-                                                                                        key={index}
-                                                                                        borderWidth="1px"
-                                                                                        borderColor={
-                                                                                            borderColor
-                                                                                        }
-                                                                                        borderRadius="md"
-                                                                                        p={4}
-                                                                                        width="100%"
-                                                                                        bg={cardBg}
-                                                                                    >
-                                                                                        <Text
-                                                                                            fontWeight="bold"
-                                                                                            mb={2}
-                                                                                        >
-                                                                                            Option{' '}
-                                                                                            {index +
-                                                                                                1}
-                                                                                        </Text>
-                                                                                        {option.imageUrl && (
-                                                                                            <Image
-                                                                                                src={
-                                                                                                    option.imageUrl
-                                                                                                }
-                                                                                                alt={`Generated image for ${content.topic}`}
-                                                                                                maxH="200px"
-                                                                                                mb={
-                                                                                                    2
-                                                                                                }
-                                                                                                borderRadius="md"
-                                                                                                objectFit="cover"
-                                                                                            />
-                                                                                        )}
-                                                                                        <Text
-                                                                                            mt={2}
-                                                                                            whiteSpace="pre-wrap"
-                                                                                        >
-                                                                                            <strong>
-                                                                                                Text:
-                                                                                            </strong>{' '}
-                                                                                            {
-                                                                                                option.text
-                                                                                            }
-                                                                                        </Text>
-                                                                                        <Text
-                                                                                            mt={2}
-                                                                                        >
-                                                                                            <strong>
-                                                                                                Hashtags:
-                                                                                            </strong>{' '}
-                                                                                            {
-                                                                                                option.hashtags
-                                                                                            }
-                                                                                        </Text>
-                                                                                        <Text
-                                                                                            mt={2}
-                                                                                        >
-                                                                                            <strong>
-                                                                                                Alt
-                                                                                                Text:
-                                                                                            </strong>{' '}
-                                                                                            {
-                                                                                                option.altText
-                                                                                            }
-                                                                                        </Text>
-                                                                                    </Box>
-                                                                                )
-                                                                            )
-                                                                        ) : (
-                                                                            <Text>
-                                                                                No content options
-                                                                                available for this
-                                                                                item.
-                                                                            </Text>
-                                                                        )}
+                                                                        {
+                                                                            <Box mt={8}>
+                                                                                <Heading
+                                                                                    size="md"
+                                                                                    mb={4}
+                                                                                >
+                                                                                    Generated
+                                                                                    Content
+                                                                                </Heading>
+                                                                                <Box
+                                                                                    bg="white"
+                                                                                    p={4}
+                                                                                    shadow="md"
+                                                                                    borderWidth="1px"
+                                                                                    borderRadius="md"
+                                                                                >
+                                                                                    <Text
+                                                                                        fontSize="md"
+                                                                                        whiteSpace="pre-line"
+                                                                                        dangerouslySetInnerHTML={{
+                                                                                            __html: markdownToJSX(
+                                                                                                content.content
+                                                                                            )
+                                                                                        }}
+                                                                                    />
+                                                                                </Box>
+                                                                            </Box>
+                                                                        }
                                                                         <Text
                                                                             fontSize="xs"
                                                                             color="gray.500"

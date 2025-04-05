@@ -37,7 +37,7 @@ export default function Navbar() {
     };
 
     const NAV_ITEMS = [
-        { label: 'Docs', href: '/docs', requiresAuth: false },
+        // { label: 'Docs', href: '/docs', requiresAuth: false },
         { label: 'Feedback', href: '/feedback', requiresAuth: false },
         ...(user?.isAdmin ? [{ label: 'Admin', href: '/admin', requiresAuth: true }] : [])
     ];
