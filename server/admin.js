@@ -89,7 +89,7 @@ const adminRoutes = (app) => {
                 .sort({ createdAt: -1 });
             res.json(contents);
         } catch (error) {
-            console.error('Admin presentations fetch error:', error);
+            console.error('Admin contents fetch error:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     });
@@ -106,7 +106,7 @@ const adminRoutes = (app) => {
             ]);
             res.json(modelStats);
         } catch (error) {
-            console.error('Admin presentation model stats error:', error);
+            console.error('Admin content model stats error:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     });
@@ -142,11 +142,11 @@ const adminRoutes = (app) => {
         try {
             const content = await Content.findByIdAndDelete(req.params.id);
             if (!content) {
-                return res.status(404).json({ error: 'Presentation not found' });
+                return res.status(404).json({ error: 'Content not found' });
             }
-            res.json({ message: 'Presentation deleted successfully' });
+            res.json({ message: 'Content deleted successfully' });
         } catch (error) {
-            console.error('Admin presentation delete error:', error);
+            console.error('Admin content delete error:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     });
@@ -187,13 +187,13 @@ const adminRoutes = (app) => {
             }
             const content = await Content.findById(req.params.id);
             if (!content) {
-                return res.status(404).json({ error: 'Presentation not found' });
+                return res.status(404).json({ error: 'Content not found' });
             }
             content.isPrivate = isPrivate;
             await content.save();
-            res.json({ message: 'Presentation privacy status updated successfully' });
+            res.json({ message: 'Content privacy status updated successfully' });
         } catch (error) {
-            console.error('Admin presentation privacy update error:', error);
+            console.error('Admin content privacy update error:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     });

@@ -68,9 +68,9 @@ ChartJS.register(
 const Admin = () => {
     const toast = useToast();
     const cancelRef = useRef();
-    const [stats, setStats] = useState({ stats: {}, userGrowth: [], presentationsStats: {} });
+    const [stats, setStats] = useState({ stats: {}, userGrowth: [], contentsStats: {} });
     const [users, setUsers] = useState([]);
-    const [presentations, setPresentations] = useState([]);
+    const [contents, setContents] = useState([]);
     const [feedbacks, setFeedbacks] = useState([]);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState({ id: null, type: null });
@@ -81,29 +81,29 @@ const Admin = () => {
         try {
             setIsLoading(true);
             const token = localStorage.getItem('token');
-            const [dashboardRes, usersRes, presentationsRes, feedbacksRes] = await Promise.all([
+            const [dashboardRes, usersRes, contentsRes, feedbacksRes] = await Promise.all([
                 fetch(`${API_URL}/api/admin/dashboard`, {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
                 fetch(`${API_URL}/api/admin/users`, {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
-                fetch(`${API_URL}/api/admin/presentations`, {
+                fetch(`${API_URL}/api/admin/contents`, {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
                 fetch(`${API_URL}/api/admin/feedbacks`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ]);
-            const [dashboardData, usersData, presentationsData, feedbacksData] = await Promise.all([
+            const [dashboardData, usersData, contentsData, feedbacksData] = await Promise.all([
                 dashboardRes.json(),
                 usersRes.json(),
-                presentationsRes.json(),
+                contentsRes.json(),
                 feedbacksRes.json()
             ]);
             setStats(dashboardData);
             setUsers(usersData);
-            setPresentations(presentationsData);
+            setContents(contentsData);
             setFeedbacks(feedbacksData);
         } catch {
             toast({
@@ -195,12 +195,12 @@ const Admin = () => {
     );
 
     const handlePrivacyChange = useCallback(
-        async (presentationId, newPrivacy) => {
+        async (contentId, newPrivacy) => {
             try {
                 setIsLoading(true);
                 const token = localStorage.getItem('token');
                 const response = await fetch(
-                    `${API_URL}/api/admin/presentations/${presentationId}/privacy`,
+                    `${API_URL}/api/admin/contents/${contentId}/privacy`,
                     {
                         method: 'PUT',
                         headers: {
@@ -213,20 +213,20 @@ const Admin = () => {
                 if (!response.ok) throw new Error();
                 toast({
                     title: 'Success',
-                    description: 'Presentation privacy updated successfully.',
+                    description: 'Content privacy updated successfully.',
                     status: 'success',
                     duration: 2000,
                     isClosable: true
                 });
-                setPresentations((prevPresentations) =>
-                    prevPresentations.map((p) =>
-                        p._id === presentationId ? { ...p, isPrivate: newPrivacy } : p
+                setContents((prevContents) =>
+                    prevContents.map((p) =>
+                        p._id === contentId ? { ...p, isPrivate: newPrivacy } : p
                     )
                 );
             } catch {
                 toast({
                     title: 'Error',
-                    description: 'Failed to update presentation privacy.',
+                    description: 'Failed to update content privacy.',
                     status: 'error',
                     duration: 2000,
                     isClosable: true
@@ -240,7 +240,7 @@ const Admin = () => {
 
     const renderOverviewTab = useCallback(() => {
         const modelCounts = {};
-        presentations.forEach((p) => {
+        contents.forEach((p) => {
             const key = p.model || 'Unknown';
             modelCounts[key] = (modelCounts[key] || 0) + 1;
         });
@@ -305,17 +305,17 @@ const Admin = () => {
                         />
                     )}
                 </Box>
-                {stats.presentationsStats?.presentationGrowth?.length > 0 && (
+                {stats.contentsStats?.contentGrowth?.length > 0 && (
                     <Box w="full" h="400px" p={4}>
                         <Line
                             data={{
-                                labels: stats.presentationsStats.presentationGrowth.map(
+                                labels: stats.contentsStats.contentGrowth.map(
                                     (d) => d._id
                                 ),
                                 datasets: [
                                     {
-                                        label: 'Presentation Growth',
-                                        data: stats.presentationsStats.presentationGrowth.map(
+                                        label: 'Content Growth',
+                                        data: stats.contentsStats.contentGrowth.map(
                                             (d) => d.count
                                         ),
                                         borderColor: '#3498DB',
@@ -347,15 +347,15 @@ const Admin = () => {
                     <Card>
                         <CardBody>
                             <Stat>
-                                <StatLabel>Presentations</StatLabel>
-                                <StatNumber>{presentations.length}</StatNumber>
+                                <StatLabel>Contents</StatLabel>
+                                <StatNumber>{contents.length}</StatNumber>
                             </Stat>
                         </CardBody>
                     </Card>
                 </SimpleGrid>
             </VStack>
         );
-    }, [stats, presentations]);
+    }, [stats, contents]);
 
     if (isLoading && !users.length) {
         return (
@@ -375,10 +375,10 @@ const Admin = () => {
             </HStack>
             <Tabs isLazy index={selectedTab} onChange={setSelectedTab}>
                 <TabList>
-                    <Tab>Over</Tab>
-                    <Tab>Usrs</Tab>
-                    <Tab>Pres</Tab>
-                    <Tab>Feed</Tab>
+                    <Tab>Overview</Tab>
+                    <Tab>Users</Tab>
+                    <Tab>Contents</Tab>
+                    <Tab>Feedbacks</Tab>
                 </TabList>
                 <TabPanels>
                     <TabPanel>{renderOverviewTab()}</TabPanel>
@@ -483,19 +483,19 @@ const Admin = () => {
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {presentations.map((presentation) => (
-                                    <Tr key={presentation._id}>
-                                        <Td>{presentation.title}</Td>
-                                        <Td>{presentation.userId?.email || 'N/A'}</Td>
-                                        <Td>{new Date(presentation.createdAt).toLocaleString()}</Td>
+                                {contents.map((content) => (
+                                    <Tr key={content._id}>
+                                        <Td>{content.title}</Td>
+                                        <Td>{content.userId?.email || 'N/A'}</Td>
+                                        <Td>{new Date(content.createdAt).toLocaleString()}</Td>
                                         <Td>
                                             <Switch
                                                 size="sm"
                                                 colorScheme="blue"
-                                                isChecked={presentation.isPrivate}
+                                                isChecked={content.isPrivate}
                                                 onChange={(e) =>
                                                     handlePrivacyChange(
-                                                        presentation._id,
+                                                        content._id,
                                                         e.target.checked
                                                     )
                                                 }
@@ -508,8 +508,8 @@ const Admin = () => {
                                                 leftIcon={<DeleteIcon />}
                                                 onClick={() => {
                                                     setItemToDelete({
-                                                        id: presentation._id,
-                                                        type: 'presentations'
+                                                        id: content._id,
+                                                        type: 'contents'
                                                     });
                                                     setIsDeleteAlertOpen(true);
                                                 }}

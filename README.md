@@ -200,9 +200,6 @@ Turbocontent, leveraging the described project structure.
   to automatically repurpose generated content for different platforms and formats (e.g., blog posts
   from social media content, video scripts from text posts), maximizing content utilization and
   reach across multiple channels.
-- **Team Collaboration & User Account Management with Roles & Permissions:** Introduce secure user
-  accounts and team collaboration features for shared workspaces, role-based access control,
-  collaborative content creation workflows, and team-based content calendar management.
 
 # TODO
 
