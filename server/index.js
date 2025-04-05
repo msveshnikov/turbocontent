@@ -14,7 +14,7 @@ import Content from './models/Content.js';
 import userRoutes from './user.js';
 import adminRoutes from './admin.js';
 import { authenticateTokenOptional, authenticateToken } from './middleware/auth.js';
-import { getTextGemini } from './gemini.js';
+import { getTextImageContent } from './gemini.js';
 
 dotenv.config();
 
@@ -40,6 +40,7 @@ const metricsMiddleware = promBundle({
 app.use(metricsMiddleware);
 app.use(cors());
 app.use(express.static(join(__dirname, '../dist')));
+app.use('/media', express.static(join(__dirname, '../media')));
 app.use(morgan('dev'));
 app.use(compression());
 
@@ -56,17 +57,6 @@ mongoose.connect(process.env.MONGODB_URI, {});
 
 userRoutes(app);
 adminRoutes(app);
-
-const generateAIResponse = async (prompt, model, temperature = 0.7) => {
-    switch (model) {
-        case 'gemini-2.5-pro-exp-03-25':
-        case 'gemini-2.0-flash-001':
-        case 'gemini-2.0-flash-thinking-exp-01-21':
-            return await getTextGemini(prompt, model, temperature);
-        default:
-            return await getTextGemini(prompt, 'gemini-2.0-flash-thinking-exp-01-21', temperature);
-    }
-};
 
 app.post('/api/feedback', authenticateTokenOptional, async (req, res) => {
     try {
@@ -87,13 +77,7 @@ app.post('/api/feedback', authenticateTokenOptional, async (req, res) => {
 
 app.post('/api/generate-content', async (req, res) => {
     try {
-        const {
-            topic,
-            goal,
-            platform,
-            tone,
-            model = 'gemini-2.0-flash-thinking-exp-01-21'
-        } = req.body;
+        const { topic, goal, platform, tone } = req.body;
 
         if (!topic || !goal || !platform || !tone) {
             return res.status(400).json({
@@ -101,22 +85,20 @@ app.post('/api/generate-content', async (req, res) => {
             });
         }
 
-        const prompt = `Generate 3 different social media post options about the topic: "${topic}".
+        const prompt = `Generate social media post about the topic: "${topic}".
             The goal of the posts is to "${goal}".
             The target platform is ${platform}.
             The desired tone is ${tone}.
 
-            Each post option should include:
+            Post option should include:
             - Engaging text optimized for the platform.
-            - Relevant hashtags.
-            - A short description for alt text for an image that would be relevant to the post.
-
-            Format each option as a JSON object with keys: text, hashtags, altText.
-            Return the response as a JSON array of these objects.`;
+            - Relevant images and hashtags.
+            
+            Return the response as a markdown`;
 
         let aiResponse;
         try {
-            aiResponse = await generateAIResponse(prompt, model);
+            aiResponse = await getTextImageContent(prompt);
         } catch (aiError) {
             console.error('AI generation failed:', aiError);
             return res
@@ -124,22 +106,7 @@ app.post('/api/generate-content', async (req, res) => {
                 .json({ error: 'AI content generation failed', details: aiError.message });
         }
 
-        let contentOptions;
-        try {
-            contentOptions = JSON.parse(aiResponse);
-            if (!Array.isArray(contentOptions)) {
-                contentOptions = [
-                    { text: aiResponse, hashtags: '', altText: 'Placeholder image description' }
-                ];
-            }
-        } catch (parseError) {
-            console.error('JSON parsing failed:', parseError);
-            contentOptions = [
-                { text: aiResponse, hashtags: '', altText: 'Placeholder image description' }
-            ]; // Fallback even if JSON parsing fails, to return raw text.
-        }
-
-        res.status(200).json(contentOptions);
+        res.status(200).json(aiResponse);
     } catch (error) {
         console.error('Error processing generate-content request:', error);
         res.status(500).json({ error: 'Failed to generate content', details: error.message });
@@ -200,5 +167,3 @@ process.on('unhandledRejection', (reason, promise) => {
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
-
-process.env['GOOGLE_APPLICATION_CREDENTIALS'] = './google.json';

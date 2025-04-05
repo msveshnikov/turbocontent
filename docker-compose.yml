@@ -27,6 +27,7 @@ services:
             - mongodb
         restart: unless-stopped
         volumes:
+            - ./media:/app/media
             - ./google.json:/app/google.json
 
     mongodb:

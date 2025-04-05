@@ -23,14 +23,14 @@ function Content() {
     const [goal, setGoal] = useState('');
     const [platform, setPlatform] = useState('');
     const [tone, setTone] = useState('');
-    const [generatedContent, setGeneratedContent] = useState([]);
+    const [generatedContent, setGeneratedContent] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const handleGenerateContent = async () => {
         setLoading(true);
         setError('');
-        setGeneratedContent([]);
+        setGeneratedContent('');
 
         try {
             const response = await fetch(`${API_URL}/api/generate-content`, {
@@ -48,23 +48,7 @@ function Content() {
             }
 
             const data = await response.json();
-            if (Array.isArray(data)) {
-                setGeneratedContent(
-                    data.map((item, index) => ({
-                        ...item,
-                        image: `https://via.placeholder.com/300/random?text=Option+${index + 1}` // Placeholder image URL
-                    }))
-                );
-            } else {
-                setGeneratedContent([
-                    {
-                        text: JSON.stringify(data),
-                        image: 'https://via.placeholder.com/300',
-                        hashtags: '#error #api'
-                    }
-                ]);
-                setError('Unexpected response format from API.');
-            }
+            setGeneratedContent(data);
         } catch (error) {
             console.error('Error generating content:', error);
             if (!error) {

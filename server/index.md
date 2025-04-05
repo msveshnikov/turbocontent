@@ -1,387 +1,377 @@
-Below is the complete documentation for the file server/index.js. This file is the main entry point
-for the backend of the Turbocontent application. It sets up an Express server, configures middleware
-(including CORS, rate limiting, logging, compression, and Prometheus metrics), connects to MongoDB,
-wires up API routes, and integrates with third-party services such as Stripe. The server is
-responsible for generating AI-powered presentations, handling user and admin routes, processing
-feedback, serving static files, and handling webhooks.
-
----
-
-# Turbocontent Server Documentation
-
-This documentation covers the functionality implemented in the server/index.js file along with its
-role in the overall project.
-
----
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Dependencies and Environment Setup](#dependencies-and-environment-setup)
-3. [Middleware and Server Configuration](#middleware-and-server-configuration)
-4. [Helper Functions](#helper-functions)
-5. [API Endpoints](#api-endpoints)
-    - [POST /api/generate-presentation](#post-apigenerate-presentation)
-    - [GET /api/presentations](#get-apipresentations)
-    - [GET /api/mypresentations](#get-apimypresentations)
-    - [GET /api/presentations/:identifier](#get-apipresentationsidentifier)
-    - [POST /api/feedback](#post-apifeedback)
-    - [POST /api/stripe-webhook](#post-apistripe-webhook)
-    - [GET /sitemap.xml](#get-sitemapxml)
-    - [GET / and /presentation/:slug](#get--and--presentationslug)
-    - [Fallback Route](#fallback-route)
-6. [Error and Process Handling](#error-and-process-handling)
-7. [Project Structure](#project-structure)
-8. [Usage Examples](#usage-examples)
-
----
+# Documentation for `server/index.js`
 
 ## Overview
 
-The server (in server/index.js) provides the backend services for the Turbocontent application. Its
-main responsibilities are:
-
-- **AI-Power Presentation Creation:** Accepts requests to generate presentations using AI models
-  (e.g., GPT and Gemini models).
-- **User Management:** Integrates user routes and subscription-based limitations.
-- **Content Serving:** Serves static assets (from the dist directory), landing pages, and
-  presentation pages with dynamic metadata.
-- **Webhook Integration:** Processes Stripe webhook events to update user subscription statuses and
-  send relevant analytics events.
-- **Metrics and Logging:** Uses Prometheus metrics (via express-prom-bundle), morgan for logging,
-  and compression for performance improvements.
-
----
-
-## Dependencies and Environment Setup
-
-The server relies on several important libraries and environment variables:
-
-- **Express:** Main web framework.
-- **CORS:** Allows cross-origin requests.
-- **Multer / JSON Parser:** For body parsing with a size limit (except on the Stripe webhook route).
-- **express-prom-bundle:** For Prometheus metrics.
-- **dotenv:** Loads environment variables (e.g., STRIPE_KEY, MONGODB_URI, PORT, STRIPE_WH_SECRET).
-- **Stripe:** To interact with the Stripe API.
-- **express-rate-limit:** To restrict request volume (only active in production).
-- **Mongoose:** For MongoDB interaction.
-- **morgan:** HTTP request logging.
-- **compression:** Compresses server responses.
-- **Path/URL:** To set paths for static files and templates.
-- **Imported Modules:**
-    - AI provider integrations (getTextGemini, getTextGpt)
-    - Models for User, Presentation, Feedback (in server/models)
-    - Middleware for authentication (server/middleware/auth.js)
-    - Additional modules such as imageService.js and admin/user route modules.
-
-Before running the server, ensure that your environment (.env) contains the required keys like
-STRIPE_KEY, STRIPE_WH_SECRET, MONGODB_URI, PORT, GA_API_SECRET, among others.
-
----
-
-## Middleware and Server Configuration
-
-1. **Express JSON Parsing with 15mb Limit:**  
-   The JSON body parser is conditionally applied. The Stripe webhook endpoint bypasses the body
-   parser since it requires raw payload parsing.
-
-2. **Prometheus Metrics:**  
-   The promBundle middleware is configured to capture request method, path, status code, and default
-   metrics with a creation timestamp.
-
-3. **CORS and Static Files:**  
-   The server enables CORS and serves static files from the `../dist` directory.
-
-4. **Morgan and Compression:**  
-   morgan logs HTTP requests in 'dev' mode, and compression is applied to improve response
-   performance.
-
-5. **Rate Limiting:**  
-   In production, the API endpoints under `/api/` are rate limited to 30 requests per 15 minutes.
-
-6. **Database Connection:**  
-   Mongoose connects to the MongoDB URI provided in the environment variables.
-
-7. **Route Setup:**  
-   The server imports and registers user and admin routes from separate modules.
-
----
-
-## Helper Functions
-
-### generateAIResponse(prompt, model, temperature)
-
-- **Purpose:**  
-  Determines which AI service to use based on the model argument.
-- **Parameters:**  
-  • prompt (String): The prompt text for the AI model.  
-  • model (String): AI model identifier (e.g., 'o3-mini', 'gemini-2.0-pro-exp-02-05').  
-  • temperature (Number): The temperature for text generation (default 0.7).
-- **Returns:**  
-  A promise that resolves with the AI generated response.
-- **Usage:**  
-  Called internally by the `/api/generate-presentation` endpoint to fetch AI-generated content.
-
----
-
-### checkAiLimit(req, res, next)
-
-- **Purpose:**  
-  Middleware function to limit the number of daily AI requests for users without an active or trial
-  subscription.
-- **Parameters:**  
-  • req: Incoming request containing user token info (req.user.id).  
-  • res: Response object.  
-  • next: Callback to proceed to next middleware.
-- **Behavior:**  
-  Increases the user’s AI request count and saves the last request time. If the count exceeds 5 (and
-  the user is not subscribed/trialing) on the same day, returns a 429 error with a message "Daily AI
-  request limit reached".
-- **Usage:**  
-  Attached to the route for generating presentations to prevent abuse.
-
----
-
-### extractCodeSnippet(text)
-
-- **Purpose:**  
-  Extracts code or JSON blocks enclosed in triple backticks (optionally with a language hint) from a
-  provided string.
-- **Parameters:**  
-  • text (String): The string to be processed.
-- **Returns:**  
-  The content inside the code block if found; otherwise, it returns the original text.
-
----
-
-### slugify(text)
-
-- **Purpose:**  
-  Converts a given string into a URL-friendly slug.
-- **Parameters:**  
-  • text (String): The input text.
-- **Returns:**  
-  A lowercase, trimmed text with spaces replaced by hyphens and special characters removed.
-- **Usage:**  
-  Used to generate a unique slug for each presentation.
-
----
-
-## API Endpoints
-
-### POST /api/generate-presentation
-
-- **Description:**  
-  Generates a PowerPoint-like presentation in JSON format using an AI model. The content is
-  generated based on a topic provided by the client along with parameters like the number of slides
-  and model type.
-- **Middlewares:**  
-  • authenticateToken – ensures the request is authenticated.  
-  • checkAiLimit – enforces daily usage limits.
-- **Input (JSON Payload):** • topic (String): The topic for the presentation (limited to the first
-  1000 characters).  
-  • numSlides (Number, Optional): The number of slides (default is 10).  
-  • model (String, Optional): The AI model identifier (default is 'o3-mini').  
-  • temperature (Number, Optional): The generation temperature (default is 0.7).
-- **Process:**
-    1. Reads a presentation schema from presentationSchema.json for reference.
-    2. Constructs a prompt incorporating the schema and topic details.
-    3. Calls generateAIResponse to obtain the presentation content.
-    4. Parses the response by extracting a JSON code snippet and converting it to an object.
-    5. Replaces graphics by calling the replaceGraphics utility.
-    6. Determines if the presentation should be marked as private based on the user’s subscription
-       status.
-    7. Saves the new presentation in MongoDB.
-- **Response:**  
-  Returns the parsed presentation JSON on success, or a 500 error with an error message if parsing
-  or generation fails.
-- **Example Request Payload:**
-
-    { "topic": "Future of Renewable Energy", "numSlides": 12, "model": "o3-mini", "temperature": 0.6
-    }
-
----
-
-### GET /api/presentations
-
-- **Description:**  
-  Retrieves a list of public presentations.
-- **Process:**  
-  Finds presentations that are either explicitly public (isPrivate: false) or do not have the
-  isPrivate flag, then sorts them in descending order of creation.
-- **Response:**  
-  Returns a limited presentation object (id, title, description, model, first slide title, slug) in
-  JSON format.
-
----
-
-### GET /api/mypresentations
-
-- **Description:**  
-  Returns presentations that belong to the authenticated user.
-- **Middlewares:**  
-  • authenticateToken – ensures that only the logged-in user’s presentations are fetched.
-- **Response:**  
-  Similar to /api/presentations, returns limited fields for each presentation owned by the user.
-
----
-
-### GET /api/presentations/:identifier
-
-- **Description:**  
-  Retrieves a presentation by its identifier. The identifier can be a MongoDB ObjectId or a slug.
-- **Process:**
-    1. Checks if the identifier is a valid ObjectId; if yes, fetches by id.
-    2. If not found, it attempts to find the presentation by slug.
-- **Response:**  
-  Returns the full presentation details or a 404 error if the presentation is not found.
-
----
-
-### POST /api/feedback
-
-- **Description:**  
-  Records user feedback.
-- **Input (JSON Payload):**  
-  • message (String): The feedback message.  
-  • type (String): The type/category of feedback.
-- **Process:**  
-  Creates a new Feedback document, optionally associating a user (if authenticated), and saves it to
-  the database.
-- **Response:**  
-  Returns the saved feedback object with a 201 status code on success.
-
----
-
-### POST /api/stripe-webhook
-
-- **Description:**  
-  Processes incoming Stripe webhook events for subscription updates.
-- **Middleware:**  
-  Uses express.raw to handle raw JSON payloads required by Stripe’s signature verification.
-- **Process:**
-    1. Verifies the incoming request using the Stripe signature and secret from the environment.
-    2. Logs the event, and for subscription events (created, updated, deleted), retrieves the
-       customer’s email and updates the corresponding user’s subscription status and ID in MongoDB.
-    3. Sends a Google Analytics event for purchase tracking.
-- **Response:**  
-  Returns a JSON acknowledgement `{ received: true }` on success or a 400 error with the error
-  message if verification fails.
-
----
-
-### GET /sitemap.xml
-
-- **Description:**  
-  Generates an XML sitemap for SEO. It includes a URL for the landing page and one URL for each
-  presentation (if the presentation has a slug).
-- **Response:**  
-  Returns an XML document with Content-Type set to application/xml.
-
----
-
-### GET / and /presentation/:slug
-
-- **GET /**  
-  Serves the landing page (landing.html) from the dist directory.
-- **GET /presentation/:slug**  
-  Serves a presentation page:
-    - Reads the default index.html.
-    - Attempts to load a presentation by ObjectId or slug.
-    - If a public presentation is found, dynamically injects presentation metadata (title,
-      description, slide list) into a full HTML response.
-    - If not found or if the presentation is private, the unmodified index.html is served.
-- **Response:**  
-  Returns HTML content appropriate to the route.
-
----
-
-### Fallback Route
-
-- **Description:**  
-  For all unmatched routes, the server reads and returns the index.html file from the dist folder. A
-  404 JSON error handler is also defined for routes that do not match any endpoint.
-- **Response:**  
-  Returns index.html for client-side routing or a JSON error with a 404 status.
-
----
-
-## Error and Process Handling
-
-- **Error Handling at the Route Level:**  
-  Each endpoint has try–catch blocks to log errors and send appropriate HTTP status codes
-  (mostly 500) with error messages.
-- **Global Process Events:**
-    - `uncaughtException`: Logs any uncaught exceptions.
-    - `unhandledRejection`: Logs any unhandled promise rejections.
-- **Server Startup:**  
-  The application listens on the specified port (default: 3000) and logs a startup message.
-
-- **Environment Setting:**  
-  Sets the environment variable `GOOGLE_APPLICATION_CREDENTIALS` at the end of the file.
-
----
-
-## Project Structure
-
-Below is a summary of how server/index.js fits in the overall project structure:
-
-- **src/** – Contains the frontend code written in React (various JSX files).
-- **server/** – Contains all backend code:
-    - index.js (this file): Main server configuration and API endpoints.
-    - Models (User.js, Presentation.js, Feedback.js): Define MongoDB schemas.
-    - Middleware (auth.js): Contains authentication logic.
-    - Additional integration files: openai.js, gemini.js, imageService.js, etc.
-    - Route files: user.js (user routes), admin.js (admin routes).
-- **public/** – Contains assets like landing.html and robots.txt.
-- **docs/** – Contains documentation and related texts (privacy policy, release notes, etc.).
-- **Other Files:** Dockerfile, docker-compose.yml, vite.config.js, etc., for containerization and
-  build configuration.
-
-The server/index.js file is crucial as it orchestrates the API, integrates various modules, and
-serves as the backend gateway for the Turbocontent application.
-
----
-
-## Usage Examples
-
-### Example 1: Generate a Presentation
-
-Send a POST request to /api/generate-presentation (requires authentication):
-
-Request URL:  
-https://yourdomain.com/api/generate-presentation
-
-Request Headers: • Authorization: Bearer <access_token>  
-• Content-Type: application/json
-
-Request Body: { "topic": "Innovations in Artificial Intelligence", "numSlides": 8, "model":
-"o3-mini", "temperature": 0.65 }
-
-Successful Response (HTTP 201): { "title": "Innovations in Artificial Intelligence", "description":
-"A concise presentation on the latest tech innovations in AI.", "version": "v1", "theme": "modern",
-"slides": [ { "title": "Slide 1", "content": "Introduction" }, { "title": "Slide 2", "content":
-"Overview" } // More slides... ] }
-
-### Example 2: Retrieve Public Presentations
-
-Send a GET request to /api/presentations:
-
-Request URL:  
-https://yourdomain.com/api/presentations
-
-Successful Response (HTTP 200): [ { "_id": "64a1b2c3d4e5f6... ", "title": "Innovations in AI",
-"description": "An engaging presentation on AI advancements", "model": "o3-mini", "firstSlideTitle":
-"Introduction", "slug": "innovations-in-ai" }, // Other presentations... ]
-
-### Example 3: Stripe Webhook Event
-
-Stripe sends a POST request to /api/stripe-webhook when a subscription update occurs.  
-The server verifies the signature, logs the event, updates the user’s subscription status, and fires
-an event to Google Analytics.
-
----
-
-This documentation should help you understand the role and functionality of server/index.js within
-the Turbocontent project. Adjustments and extensions can be made as new features or integrations are
-added.
+`server/index.js` is the main entry point for the backend server application. It is built using
+Node.js and Express.js, and serves as the core logic for handling API requests, managing data, and
+interacting with the frontend application. This file sets up the Express server, configures
+middleware for various functionalities like CORS, request logging, rate limiting, and
+authentication, defines API routes for user and admin functionalities, connects to a MongoDB
+database, and starts the server. It also handles error logging and serves static files for the
+frontend application.
+
+This file is crucial for the application's backend as it orchestrates various components to provide
+a functional API and server-side logic. It interacts with database models defined in
+`server/models`, middleware in `server/middleware`, and route handlers in `server/user.js` and
+`server/admin.js`. It leverages the `gemini.js` module to integrate with the Gemini AI model for
+content generation.
+
+## Modules and Imports
+
+The file imports and utilizes the following modules:
+
+- **`express` from `'express'`**: The core framework for building the web server and defining
+  routes.
+- **`cors` from `'cors'`**: Middleware to enable Cross-Origin Resource Sharing, allowing requests
+  from different domains (like the frontend running on a different port).
+- **`fs` from `'fs'`**: Node.js file system module, used here to read HTML files for serving the
+  frontend application.
+- **`promBundle` from `'express-prom-bundle'`**: Middleware for collecting and exposing application
+  metrics in Prometheus format, useful for monitoring server performance.
+- **`dotenv` from `'dotenv'`**: Loads environment variables from a `.env` file into `process.env`,
+  used for configuration like ports and database URIs.
+- **`rateLimit` from `'express-rate-limit'`**: Middleware to limit the number of requests from a
+  single IP address within a given time window, protecting against abuse and DDoS attacks.
+- **`mongoose` from `'mongoose'`**: MongoDB object modeling tool, used to connect to and interact
+  with the MongoDB database.
+- **`morgan` from `'morgan'`**: HTTP request logger middleware for logging request details during
+  development.
+- **`compression` from `'compression'`**: Middleware to compress response bodies, improving
+  performance by reducing data transfer size.
+- **`dirname` and `join` from `'path'`**: Node.js path utilities for working with file and directory
+  paths, ensuring path compatibility across different operating systems.
+- **`fileURLToPath` from `'url'`**: Utility to convert a file URL to a file path, necessary when
+  using ES modules in Node.js to get the current directory.
+- **`Feedback` from `'./models/Feedback.js'`**: Mongoose model for the `Feedback` collection,
+  representing user feedback data.
+- **`Content` from `'./models/Content.js'`**: Mongoose model for the `Content` collection,
+  representing generated and saved content data.
+- **`userRoutes` from `'./user.js'`**: Imported function that defines and applies user-related API
+  routes to the Express app.
+- **`adminRoutes` from `'./admin.js'`**: Imported function that defines and applies admin-related
+  API routes to the Express app.
+- **`authenticateTokenOptional`, `authenticateToken` from `'./middleware/auth.js'`**: Middleware
+  functions for JWT-based authentication. `authenticateToken` requires a valid token, while
+  `authenticateTokenOptional` verifies a token if present but doesn't require it.
+- **`getTextGemini` from `'./gemini.js'`**: Function to interact with the Gemini AI model for text
+  generation.
+
+## Middleware Configuration
+
+The application uses several middleware functions to enhance its functionality and security:
+
+- **`app.set('trust proxy', 1)`**: Configures Express to trust the first proxy in front of the
+  server. This is important for rate limiting and getting the correct client IP address when behind
+  a proxy like in production environments.
+- **`express.json({ limit: '15mb' })`**: Parses incoming requests with JSON payloads. The `limit`
+  option sets the maximum request body size to 15MB, useful for handling potentially large content
+  generation requests.
+- **`metricsMiddleware (promBundle)`**: Configures and applies the `express-prom-bundle` middleware.
+    - `includeMethod: true`, `includePath: true`, `includeStatusCode: true`: Includes HTTP method,
+      path, and status code in the metrics.
+    - `customLabels: { model: 'No' }`: Sets a default custom label 'model' to 'No'.
+    - `transformLabels`: A function to dynamically modify labels based on the request body. It
+      extracts the `model` from the request body if present, otherwise defaults to 'No'. This allows
+      tracking metrics based on the AI model used in requests.
+- **`cors()`**: Enables CORS for all routes, allowing cross-origin requests. In a production setup,
+  you might want to configure this more restrictively to only allow specific origins.
+- **`express.static(join(__dirname, '../dist'))`**: Serves static files from the `../dist`
+  directory. This is likely where the bundled frontend application is located after building (e.g.,
+  using Vite).
+- **`morgan('dev')`**: Logs HTTP requests in 'dev' format to the console. Useful for development
+  logging.
+- **`compression()`**: Enables Gzip compression for responses, reducing bandwidth usage and
+  improving page load times for clients.
+- **`limiter (rateLimit)`**: Configures and applies the `express-rate-limit` middleware.
+    - `windowMs: 15 * 60 * 1000`: Sets the time window for rate limiting to 15 minutes.
+    - `max: 130`: Sets the maximum number of requests allowed within the window to 130.
+    - Applied to `/api/` routes only in production (`process.env.NODE_ENV === 'production'`). This
+      rate limit is applied to protect API endpoints from excessive requests in production.
+
+## Routes
+
+The application defines the following routes:
+
+- **User Routes (`userRoutes(app)`)**: Mounts user-related routes (defined in `user.js`) onto the
+  Express application instance (`app`). These routes likely handle user authentication, profile
+  management, and other user-specific functionalities.
+- **Admin Routes (`adminRoutes(app)`)**: Mounts admin-related routes (defined in `admin.js`) onto
+  the Express application instance (`app`). These routes likely handle administrative tasks such as
+  user management, content moderation, or system configuration, and are typically protected with
+  admin-level authentication.
+
+- **`POST /api/feedback`**:
+
+    - **Authentication:** `authenticateTokenOptional` - Optional JWT authentication. If a valid
+      token is provided, the user's ID is associated with the feedback.
+    - **Request Body:**
+        ```json
+        {
+            "message": "User feedback message",
+            "type": "Suggestion" // or "Bug Report", "General Feedback", etc.
+        }
+        ```
+    - **Description:** Endpoint to submit user feedback. It saves the feedback message, type, and
+      optionally the user ID if authenticated into the `Feedback` collection in the database.
+    - **Request Parameters:**
+        - `message` (String, required): The feedback message provided by the user.
+        - `type` (String, required): The type of feedback (e.g., "Suggestion", "Bug Report").
+    - **Returns:**
+        - **201 Created:** On successful feedback submission, returns the saved feedback object in
+          JSON format.
+        ```json
+        {
+            "userId": "optionalUserId",
+            "message": "User feedback message",
+            "type": "Suggestion",
+            "createdAt": "timestamp",
+            "_id": "feedbackObjectId",
+            "__v": 0
+        }
+        ```
+        - **500 Internal Server Error:** If feedback submission fails, returns an error message in
+          JSON format.
+        ```json
+        {
+            "error": "Failed to submit feedback",
+            "details": "Error details"
+        }
+        ```
+    - **Usage Example:**
+        ```bash
+        curl -X POST -H "Content-Type: application/json" -d '{"message": "This is a great feature!", "type": "Suggestion"}' http://localhost:3000/api/feedback
+        ```
+
+- **`POST /api/generate-content`**:
+
+    - **Authentication:** No authentication required.
+    - **Request Body:**
+        ```json
+        {
+            "topic": "Social Media Marketing",
+            "goal": "Increase brand awareness",
+            "platform": "Twitter",
+            "tone": "Professional",
+            "model": "gemini-2.0-flash-thinking-exp-01-21" // Optional, defaults to 'gemini-2.0-flash-thinking-exp-01-21'
+        }
+        ```
+    - **Description:** Endpoint to generate social media content using the Gemini AI model. It takes
+      topic, goal, platform, and tone as input and returns an array of content options.
+    - **Request Parameters:**
+        - `topic` (String, required): The topic for the social media post.
+        - `goal` (String, required): The objective of the social media post.
+        - `platform` (String, required): The target social media platform (e.g., "Twitter",
+          "Instagram", "LinkedIn").
+        - `tone` (String, required): The desired tone of the content (e.g., "Professional",
+          "Casual", "Humorous").
+        - `model` (String, optional): The specific Gemini model to use for content generation.
+          Defaults to `'gemini-2.0-flash-thinking-exp-01-21'`.
+    - **Returns:**
+        - **200 OK:** On successful content generation, returns an array of content options in JSON
+          format. Each option is an object with `text`, `hashtags`, and `altText` keys.
+        ```json
+        [
+            {
+                "text": "Engaging social media post text option 1...",
+                "hashtags": "#SocialMedia #Marketing #BrandAwareness",
+                "altText": "Description for image related to post option 1"
+            },
+            {
+                "text": "Engaging social media post text option 2...",
+                "hashtags": "#SMM #DigitalMarketing #BrandBuilding",
+                "altText": "Description for image related to post option 2"
+            }
+        ]
+        ```
+        - **400 Bad Request:** If any required parameters (`topic`, `goal`, `platform`, `tone`) are
+          missing.
+        ```json
+        {
+            "error": "Missing required parameters: topic, goal, platform, and tone are required."
+        }
+        ```
+        - **500 Internal Server Error:** If AI content generation fails or JSON parsing fails.
+          Returns an error message in JSON format with details.
+        ```json
+        {
+            "error": "AI content generation failed",
+            "details": "Error details from Gemini API"
+        }
+        ```
+    - **Usage Example:**
+        ```bash
+        curl -X POST -H "Content-Type: application/json" -d '{"topic": "Web Development", "goal": "Promote our web development services", "platform": "LinkedIn", "tone": "Expert"}' http://localhost:3000/api/generate-content
+        ```
+
+- **`POST /api/save-content`**:
+
+    - **Authentication:** `authenticateToken` - JWT authentication is required. Only authenticated
+      users can save content.
+    - **Request Body:**
+        ```json
+        {
+            "topic": "Social Media Marketing",
+            "goal": "Increase brand awareness",
+            "platform": "Twitter",
+            "tone": "Professional",
+            "contentOptions": [
+                { "text": "...", "hashtags": "...", "altText": "..." },
+                { "text": "...", "hashtags": "...", "altText": "..." }
+            ],
+            "model": "gemini-2.0-flash-thinking-exp-01-21",
+            "isPrivate": false // Optional, defaults to false
+        }
+        ```
+    - **Description:** Endpoint to save generated content to the database for a logged-in user.
+    - **Request Parameters:**
+        - `topic` (String, required): The topic of the content.
+        - `goal` (String, required): The goal of the content.
+        - `platform` (String, required): The target platform.
+        - `tone` (String, required): The tone of the content.
+        - `contentOptions` (Array, required): An array of content options generated by the AI.
+        - `model` (String, required): The AI model used to generate the content.
+        - `isPrivate` (Boolean, optional): Indicates if the content should be private to the user.
+          Defaults to `false`.
+    - **Returns:**
+        - **201 Created:** On successful content saving, returns the saved content object in JSON
+          format.
+        ```json
+        {
+            "userId": "userId",
+            "topic": "Social Media Marketing",
+            "goal": "Increase brand awareness",
+            "platform": "Twitter",
+            "tone": "Professional",
+            "contentOptions": [ ... ],
+            "model": "gemini-2.0-flash-thinking-exp-01-21",
+            "isPrivate": false,
+            "_id": "contentObjectId",
+            "createdAt": "timestamp",
+            "updatedAt": "timestamp",
+            "__v": 0
+        }
+        ```
+        - **400 Bad Request:** If any required parameters (`topic`, `goal`, `platform`, `tone`,
+          `contentOptions`) are missing.
+        ```json
+        {
+            "error": "Missing required parameters: topic, goal, platform, tone, and contentOptions are required."
+        }
+        ```
+        - **500 Internal Server Error:** If content saving fails. Returns an error message in JSON
+          format with details.
+        ```json
+        {
+            "error": "Failed to save content",
+            "details": "Error details"
+        }
+        ```
+    - **Usage Example:**
+        ```bash
+        curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_JWT_TOKEN" -d '{"topic": "Web Development", "goal": "Promote our services", "platform": "LinkedIn", "tone": "Expert", "contentOptions": [{"text": "...", "hashtags": "...", "altText": "..."}, {"text": "...", "hashtags": "...", "altText": "..."}], "model": "gemini-2.0-flash-thinking-exp-01-21"}' http://localhost:3000/api/save-content
+        ```
+
+- **`GET /`**:
+
+    - **Authentication:** No authentication required.
+    - **Description:** Serves the `landing.html` file located in the `../dist` directory. This is
+      likely the landing page of the application.
+    - **Returns:**
+        - **200 OK:** Returns the HTML content of `landing.html`.
+
+- **`GET *`**:
+
+    - **Authentication:** No authentication required.
+    - **Description:** A catch-all route that serves the `index.html` file from the `../dist`
+      directory for any other GET requests that don't match specific routes. This is typically used
+      to serve the main frontend application (e.g., for single-page applications where routing is
+      handled on the client-side).
+    - **Returns:**
+        - **200 OK:** Returns the HTML content of `index.html`.
+
+- **`404 Not Found Handler`**:
+    - **Description:** Middleware that handles any requests that don't match any defined routes. It
+      returns a 404 status code with a JSON error message.
+    - **Returns:**
+        - **404 Not Found:**
+        ```json
+        {
+            "error": "Not found"
+        }
+        ```
+
+## Functions
+
+- **`generateAIResponse(prompt, model, temperature = 0.7)`**:
+    - **Description:** A wrapper function that calls the `getTextGemini` function to generate text
+      using the Gemini AI model.
+    - **Parameters:**
+        - `prompt` (String, required): The prompt text to send to the AI model.
+        - `model` (String, required): The name of the Gemini model to use.
+        - `temperature` (Number, optional): The temperature parameter for the AI model, controlling
+          the randomness of the output. Defaults to `0.7`.
+    - **Returns:**
+        - `Promise<string>`: A promise that resolves with the text response from the Gemini AI
+          model.
+    - **Usage Example (Internal):**
+        ```javascript
+        const aiText = await generateAIResponse('Write a short poem.', 'gemini-pro');
+        console.log(aiText);
+        ```
+
+## Database Connection
+
+- **`mongoose.connect(process.env.MONGODB_URI, {})`**: Establishes a connection to the MongoDB
+  database using the URI provided in the `MONGODB_URI` environment variable. The empty object `{}`
+  is for connection options (which are not specified in this code but can be added if needed, e.g.,
+  for connection pooling or authentication).
+
+## Server Startup
+
+- **`app.listen(port, () => { ... })`**: Starts the Express server and makes it listen for incoming
+  requests on the specified `port`. The `port` is determined by the `PORT` environment variable, or
+  defaults to 3000 if `PORT` is not set. A console message is logged when the server starts
+  successfully, indicating the port it's running on.
+
+## Error Handling
+
+- **`process.on('uncaughtException', (err, origin) => { ... })`**: Handles uncaught exceptions that
+  occur during the execution of the application. It logs the error and its origin to the console.
+  This is a global error handler to prevent the server from crashing due to unexpected errors.
+- **`process.on('unhandledRejection', (reason, promise) => { ... })`**: Handles unhandled promise
+  rejections. It logs the rejection reason and the promise that was rejected to the console. This is
+  important for catching errors in asynchronous operations that are not properly handled with
+  `.catch()`.
+
+## Environment Variables
+
+The application relies on environment variables for configuration, primarily loaded using `dotenv`.
+Key environment variables include:
+
+- **`PORT`**: The port on which the server will listen. Defaults to 3000 if not set.
+- **`MONGODB_URI`**: The connection string for the MongoDB database.
+- **`NODE_ENV`**: Indicates the environment (e.g., 'production', 'development'). Used to
+  conditionally apply rate limiting in production.
+- **`GOOGLE_APPLICATION_CREDENTIALS`**: Path to the Google Cloud credentials file, necessary for
+  authenticating with the Gemini API. Set programmatically at the end of the file.
+
+## Project Structure Context
+
+`server/index.js` resides within the `server` directory of the project. It is the central backend
+file that integrates with other modules within the `server` directory:
+
+- **`server/user.js` and `server/admin.js`**: Define route handlers for user and admin
+  functionalities, respectively, which are mounted in `index.js`.
+- **`server/models`**: Contains Mongoose models (`Content.js`, `Feedback.js`, `User.js`) used for
+  database interactions in `index.js` and other backend modules.
+- **`server/middleware/auth.js`**: Provides authentication middleware used in `index.js` to protect
+  certain API endpoints.
+- **`server/gemini.js`**: Contains the `getTextGemini` function used in `index.js` to interact with
+  the Gemini AI model for content generation.
+- **`public/landing.html` and `public/index.html`**: Frontend HTML files served by the server,
+  located in the `public` directory (but served from `../dist` after frontend build process).
+- **`src` directory**: Contains the frontend application code (React components, etc.) which is
+  built and its output is served by the `server/index.js` file.
+
+In essence, `server/index.js` acts as the orchestrator, bringing together various backend components
+and serving the frontend application to create a complete web application.
