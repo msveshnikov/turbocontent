@@ -1,5 +1,5 @@
 Below is the complete documentation for the file server/index.js. This file is the main entry point
-for the backend of the Boiler application. It sets up an Express server, configures middleware
+for the backend of the Turbocontent application. It sets up an Express server, configures middleware
 (including CORS, rate limiting, logging, compression, and Prometheus metrics), connects to MongoDB,
 wires up API routes, and integrates with third-party services such as Stripe. The server is
 responsible for generating AI-powered presentations, handling user and admin routes, processing
@@ -7,7 +7,7 @@ feedback, serving static files, and handling webhooks.
 
 ---
 
-# Boiler Server Documentation
+# Turbocontent Server Documentation
 
 This documentation covers the functionality implemented in the server/index.js file along with its
 role in the overall project.
@@ -38,8 +38,8 @@ role in the overall project.
 
 ## Overview
 
-The server (in server/index.js) provides the backend services for the Boiler application. Its main
-responsibilities are:
+The server (in server/index.js) provides the backend services for the Turbocontent application. Its
+main responsibilities are:
 
 - **AI-Power Presentation Creation:** Accepts requests to generate presentations using AI models
   (e.g., GPT and Gemini models).
@@ -339,7 +339,7 @@ Below is a summary of how server/index.js fits in the overall project structure:
   build configuration.
 
 The server/index.js file is crucial as it orchestrates the API, integrates various modules, and
-serves as the backend gateway for the Boiler application.
+serves as the backend gateway for the Turbocontent application.
 
 ---
 
@@ -383,5 +383,5 @@ an event to Google Analytics.
 ---
 
 This documentation should help you understand the role and functionality of server/index.js within
-the Boiler project. Adjustments and extensions can be made as new features or integrations are
+the Turbocontent project. Adjustments and extensions can be made as new features or integrations are
 added.

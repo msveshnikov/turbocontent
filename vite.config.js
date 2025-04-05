@@ -7,7 +7,7 @@ export default defineConfig({
         react()
         // sentryVitePlugin({
         //     org: 'maxsoft',
-        //     project: 'boiler-research'
+        //     project: 'turbocontent-research'
         // })
     ]
 

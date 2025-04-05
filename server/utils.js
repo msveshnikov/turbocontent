@@ -17,11 +17,11 @@ export const enrichMetadata = async (html, slug) => {
                 : '';
 
         const $ = load(html);
-        $('title').text(`${presentation.title} | Boiler.pro`);
+        $('title').text(`${presentation.title} | Turbocontent.pro`);
         $('meta[name="description"]').attr(
             'content',
             presentation.description ||
-                `An engaging presentation created with Boiler.pro${
+                `An engaging presentation created with Turbocontent.pro${
                     Array.isArray(presentation.slides) && presentation.slides.length
                         ? ' featuring ' + presentation.slides.length + ' slides.'
                         : '.'
@@ -30,11 +30,11 @@ export const enrichMetadata = async (html, slug) => {
         $('meta[property="og:title"]').attr('content', presentation.title);
         $('meta[property="og:description"]').attr(
             'content',
-            presentation.description || 'An engaging presentation created with Boiler.pro.'
+            presentation.description || 'An engaging presentation created with Turbocontent.pro.'
         );
         $('meta[property="og:url"]').attr(
             'content',
-            `https://Boiler.pro/presentation/${presentation.slug}`
+            `https://Turbocontent.pro/presentation/${presentation.slug}`
         );
 
         let imageUrl = '';
@@ -47,7 +47,7 @@ export const enrichMetadata = async (html, slug) => {
         ) {
             imageUrl = presentation.slides[0].image;
         } else {
-            imageUrl = 'https://Boiler.pro/image2.jpg';
+            imageUrl = 'https://Turbocontent.pro/image2.jpg';
         }
         $('meta[property="og:image"]').attr('content', imageUrl);
 

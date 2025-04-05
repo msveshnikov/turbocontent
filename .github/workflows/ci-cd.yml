@@ -1,4 +1,4 @@
-name: Boiler CI/CD
+name: Turbocontent CI/CD
 
 on:
     push:
@@ -14,11 +14,11 @@ jobs:
             - name: copy file via ssh
               uses: garygrossgarten/github-action-scp@master
               with:
-                  host: Boiler.pro
+                  host: Turbocontent.pro
                   username: ubuntu
                   privateKey: ${{ secrets.DEPLOY_KEY }}
                   local: './docker-compose.yml'
-                  remote: 'boiler/docker-compose.yml'
+                  remote: 'turbocontent/docker-compose.yml'
 
             - name: Setup Bun
               uses: oven-sh/setup-bun@v1
@@ -39,7 +39,7 @@ jobs:
                   docker buildx build \
                   --platform linux/arm64/v8 \
                   --output "type=image,push=true" \
-                  --tag ${{ secrets.DOCKER_USERNAME }}/boiler \
+                  --tag ${{ secrets.DOCKER_USERNAME }}/turbocontent \
                   .
 
     deploy:
@@ -54,10 +54,10 @@ jobs:
                   mkdir -p ~/.ssh/
                   echo "$SSH_KEY" > ~/.ssh/id_rsa
                   chmod 600 ~/.ssh/id_rsa
-                  ssh-keyscan -H Boiler.pro >> ~/.ssh/known_hosts
-                  ssh ubuntu@Boiler.pro '
-                    docker pull ${{ secrets.DOCKER_USERNAME }}/boiler
-                    cd boiler
+                  ssh-keyscan -H Turbocontent.pro >> ~/.ssh/known_hosts
+                  ssh ubuntu@Turbocontent.pro '
+                    docker pull ${{ secrets.DOCKER_USERNAME }}/turbocontent
+                    cd turbocontent
                     docker-compose down
                     docker-compose up -d
                   '

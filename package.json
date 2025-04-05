@@ -1,9 +1,9 @@
 {
-    "name": "boiler",
+    "name": "turbocontent",
     "version": "1.0.0",
     "private": true,
     "type": "module",
-    "description": "Boiler",
+    "description": "Instantly Generate Engaging Social Media Content.",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
