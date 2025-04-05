@@ -277,4 +277,4 @@ Turbocontent, leveraging the described project structure.
 
 # TODO
 
-- add PWA
+- change to nice pink theme color 

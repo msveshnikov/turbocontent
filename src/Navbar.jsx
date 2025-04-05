@@ -4,7 +4,6 @@ import {
     Flex,
     Text,
     IconButton,
-    Button,
     Stack,
     Collapse,
     Icon,
@@ -16,21 +15,21 @@ import {
     useColorModeValue
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { UserContext } from './App';
 
 export default function Navbar() {
     const { isOpen, onToggle } = useDisclosure();
-    const { user, setUser } = useContext(UserContext);
-    const navigate = useNavigate();
+    const { user } = useContext(UserContext);
+    // const navigate = useNavigate();
     const bgColor = useColorModeValue('white', 'gray.800');
     const borderColor = useColorModeValue('gray.200', 'gray.700');
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        setUser(null);
-        navigate('/');
-    };
+    // const handleLogout = () => {
+    //     localStorage.removeItem('token');
+    //     setUser(null);
+    //     navigate('/');
+    // };
 
     const handleNavClick = () => {
         if (isOpen) onToggle();
@@ -38,7 +37,7 @@ export default function Navbar() {
 
     const NAV_ITEMS = [
         // { label: 'Docs', href: '/docs', requiresAuth: false },
-        { label: 'Feedback', href: '/feedback', requiresAuth: false },
+        // { label: 'Feedback', href: '/feedback', requiresAuth: false },
         ...(user?.isAdmin ? [{ label: 'Admin', href: '/admin', requiresAuth: true }] : [])
     ];
 
@@ -87,7 +86,7 @@ export default function Navbar() {
                         <DesktopNav navItems={filteredNavItems} />
                     </Flex>
                 </Flex>
-                <Stack flex={{ base: 1, md: 0 }} justify="flex-end" direction="row" spacing={6}>
+                {/* <Stack flex={{ base: 1, md: 0 }} justify="flex-end" direction="row" spacing={6}>
                     {user?.email ? (
                         <>
                             <Button
@@ -140,7 +139,7 @@ export default function Navbar() {
                             </Button>
                         </>
                     )}
-                </Stack>
+                </Stack> */}
             </Flex>
             {filteredNavItems.length > 0 && (
                 <Collapse in={isOpen} animateOpacity>
