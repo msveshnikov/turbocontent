@@ -90,7 +90,7 @@ const userRoutes = (app) => {
             }
 
             // Generate token for immediate login after signup
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' }); // Add expiration
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' }); // Add expiration
             // Return user object without password and verification token
             const userResponse = { ...user.toJSON() };
             delete userResponse.password;
@@ -129,15 +129,7 @@ const userRoutes = (app) => {
                 return res.status(401).json({ error: 'Invalid credentials' });
             }
 
-            // Check if email is verified for non-Google signups
-            if (!user.emailVerified) {
-                // Optionally resend verification email here
-                return res
-                    .status(403)
-                    .json({ error: 'Please verify your email before logging in.' });
-            }
-
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' }); // Add expiration
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' }); // Add expiration
             // Return user object without sensitive fields
             const userResponse = { ...user.toJSON() };
             delete userResponse.password;
