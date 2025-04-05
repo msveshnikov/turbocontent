@@ -72,7 +72,8 @@ app.post('/api/feedback', authenticateTokenOptional, async (req, res) => {
 
 app.post('/api/generate-content', authenticateTokenOptional, async (req, res) => {
     try {
-        const { topic, goal, platform, tone } = req.body;
+        const { topic, goal, platform, tone, contentOptions } = req.body;
+        const { wordCount = 50, customInstructions = '', keywords = [] } = contentOptions || {};
 
         if (!topic || !goal || !platform || !tone) {
             return res.status(400).json({
@@ -80,17 +81,26 @@ app.post('/api/generate-content', authenticateTokenOptional, async (req, res) =>
             });
         }
 
-        const prompt = `Generate long social media post about the topic: "${topic}".
-            The goal of the posts is to "${goal}".
+        let prompt = `Generate a social media post about the topic: "${topic}".
+            The goal of the post is to "${goal}".
             The target platform is ${platform}.
             The desired tone is ${tone}.
+            Word count should be approximately ${wordCount} words.`;
 
-            Post option should include:
+        if (customInstructions) {
+            prompt += `\n\nCustom instructions: ${customInstructions}`;
+        }
+
+        if (keywords && keywords.length > 0) {
+            prompt += `\n\nInclude these keywords: ${keywords.join(', ')}`;
+        }
+
+        prompt += `\n\nPost option should include:
             - Engaging text optimized for the platform.
             - Relevant images and hashtags.
             - Always include at least 1 image (better 3, in the middle of the text, to illustrate parts).
 
-            Return the response as a markdown`;
+            Return the response as markdown`;
 
         let aiResponse;
         aiResponse = await getTextImageContent(prompt);
@@ -109,7 +119,10 @@ app.post('/api/generate-content', authenticateTokenOptional, async (req, res) =>
                 platform,
                 tone,
                 content: aiResponse,
-                isPrivate: false
+                isPrivate: false,
+                wordCount,
+                customInstructions,
+                keywords: keywords
             });
 
             await newContent.save();

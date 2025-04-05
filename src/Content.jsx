@@ -107,8 +107,8 @@ function Content() {
 
             const data = await response.json();
             setGeneratedContent(data.content);
-            setEditedContent(data.content); // Initialize edited content with generated content
-            setActiveTab(1); // Switch to Preview/Edit tab after generation
+            setEditedContent(data.content);
+            setActiveTab(1);
         } catch (error) {
             console.error('Error generating content:', error);
             if (!error) {
@@ -212,7 +212,9 @@ function Content() {
                         )}
                         <VStack spacing={5} align="stretch">
                             <FormControl id="topic" isRequired>
-                                <FormLabel>Topic</FormLabel>
+                                <Tooltip label="Enter the main topic you want to create content about. Be specific for better results.">
+                                    <FormLabel>Topic</FormLabel>
+                                </Tooltip>
                                 <Input
                                     type="text"
                                     value={topic}
@@ -221,7 +223,9 @@ function Content() {
                                 />
                             </FormControl>
                             <FormControl id="goal" isRequired>
-                                <FormLabel>Goal</FormLabel>
+                                <Tooltip label="Define the primary goal of your social media content. Choose a goal that aligns with your objectives.">
+                                    <FormLabel>Goal</FormLabel>
+                                </Tooltip>
                                 <Select
                                     value={goal}
                                     onChange={(e) => setGoal(e.target.value)}
@@ -245,7 +249,9 @@ function Content() {
                                 </Select>
                             </FormControl>
                             <FormControl id="platform" isRequired>
-                                <FormLabel>Platform</FormLabel>
+                                <Tooltip label="Select the target social media platform for your content. This helps tailor the content to platform specifics.">
+                                    <FormLabel>Platform</FormLabel>
+                                </Tooltip>
                                 <Select
                                     value={platform}
                                     onChange={(e) => setPlatform(e.target.value)}
@@ -264,7 +270,9 @@ function Content() {
                                 </Select>
                             </FormControl>
                             <FormControl id="tone" isRequired>
-                                <FormLabel>Tone</FormLabel>
+                                <Tooltip label="Choose the tone of voice for your content. The tone sets the emotional and stylistic direction of the generated text.">
+                                    <FormLabel>Tone</FormLabel>
+                                </Tooltip>
                                 <Select
                                     value={tone}
                                     onChange={(e) => setTone(e.target.value)}
@@ -284,7 +292,9 @@ function Content() {
                             </FormControl>
 
                             <FormControl id="wordCount">
-                                <FormLabel>Word Count (Approximate)</FormLabel>
+                                <Tooltip label="Specify the approximate word count for the generated content. This helps control the length and detail of the output.">
+                                    <FormLabel>Word Count (Approximate)</FormLabel>
+                                </Tooltip>
                                 <Input
                                     type="number"
                                     value={wordCount}
@@ -296,7 +306,9 @@ function Content() {
                             </FormControl>
 
                             <FormControl id="keywords">
-                                <FormLabel>Keywords (Up to 5, comma-separated)</FormLabel>
+                                <Tooltip label="Add up to 5 keywords to guide content generation. Keywords help focus the content on specific themes.">
+                                    <FormLabel>Keywords (Up to 5)</FormLabel>
+                                </Tooltip>
                                 <Flex direction="column">
                                     <HStack mb={2}>
                                         <Input
@@ -341,7 +353,9 @@ function Content() {
                             </FormControl>
 
                             <FormControl id="customInstructions">
-                                <FormLabel>Custom Instructions (Optional)</FormLabel>
+                                <Tooltip label="Provide any specific instructions or details you want the content generator to consider.">
+                                    <FormLabel>Custom Instructions (Optional)</FormLabel>
+                                </Tooltip>
                                 <Textarea
                                     value={customInstructions}
                                     onChange={(e) => setCustomInstructions(e.target.value)}
