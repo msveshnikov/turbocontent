@@ -80,7 +80,7 @@ app.post('/api/generate-content', authenticateTokenOptional, async (req, res) =>
             });
         }
 
-        const prompt = `Generate social media post about the topic: "${topic}".
+        const prompt = `Generate long social media post about the topic: "${topic}".
             The goal of the posts is to "${goal}".
             The target platform is ${platform}.
             The desired tone is ${tone}.

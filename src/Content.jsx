@@ -106,6 +106,13 @@ function Content() {
                         <option value="promotion">Promotion</option>
                         <option value="awareness">Awareness</option>
                         <option value="inspiration">Inspiration</option>
+                        <option value="lead_generation">Lead Generation</option>
+                        <option value="sales">Sales</option>
+                        <option value="website_traffic">Website Traffic</option>
+                        <option value="community_growth">Community Growth</option>
+                        <option value="customer_service">Customer Service</option>
+                        <option value="education">Education</option>
+                        <option value="entertainment">Entertainment</option>
                     </Select>
                 </FormControl>
                 <FormControl id="platform" isRequired>
