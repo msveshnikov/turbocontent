@@ -13,7 +13,7 @@ import Feedback from './models/Feedback.js';
 import userRoutes from './user.js';
 import adminRoutes from './admin.js';
 import { authenticateTokenOptional } from './middleware/auth.js';
-import { getTextGemini } from './gemini';
+import { getTextGemini } from './gemini.js';
 
 dotenv.config();
 

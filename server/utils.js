@@ -1,5 +1,4 @@
 import { load } from 'cheerio';
-import Presentation from './models/Presentation.js';
 
 export const enrichMetadata = async (html, slug) => {
     try {

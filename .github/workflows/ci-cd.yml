@@ -14,7 +14,7 @@ jobs:
             - name: copy file via ssh
               uses: garygrossgarten/github-action-scp@master
               with:
-                  host: Turbocontent.pro
+                  host: Turbocontent.art
                   username: ubuntu
                   privateKey: ${{ secrets.DEPLOY_KEY }}
                   local: './docker-compose.yml'
@@ -54,8 +54,8 @@ jobs:
                   mkdir -p ~/.ssh/
                   echo "$SSH_KEY" > ~/.ssh/id_rsa
                   chmod 600 ~/.ssh/id_rsa
-                  ssh-keyscan -H Turbocontent.pro >> ~/.ssh/known_hosts
-                  ssh ubuntu@Turbocontent.pro '
+                  ssh-keyscan -H Turbocontent.art >> ~/.ssh/known_hosts
+                  ssh ubuntu@Turbocontent.art '
                     docker pull ${{ secrets.DOCKER_USERNAME }}/turbocontent
                     cd turbocontent
                     docker-compose down

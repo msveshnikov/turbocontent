@@ -1,7 +1,6 @@
 import { VertexAI } from '@google-cloud/vertexai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
-import { MAX_AVATAR_COMMENT_TOKENS } from './utils.js';
 import { dirname, join } from 'path';
 import { nanoid } from 'nanoid';
 import sharp from 'sharp';
@@ -18,7 +17,7 @@ const MEDIA_FOLDER = join(__dirname, '../media');
 export const getTextGemini = async (prompt, model, temperature = 0.7, imageBase64) => {
     const generation_config = {
         temperature: temperature,
-        maxOutputTokens: MAX_AVATAR_COMMENT_TOKENS,
+        maxOutputTokens: 8192,
         tools: [
             {
                 googleSearchRetrieval: {
