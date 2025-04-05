@@ -206,4 +206,4 @@ Turbocontent, leveraging the described project structure.
 
 # TODO
 
-- [ ] Flesh out `Profile.jsx` with user settings and content management features.
+- replace Presentations with Contents

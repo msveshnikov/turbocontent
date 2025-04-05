@@ -292,7 +292,7 @@ const Profile = () => {
                                 >
                                     <Heading size="md">Subscription</Heading>
                                     <Badge
-                                        fontSize="md"
+                                        fontSize="sm"
                                         px={3}
                                         py={1}
                                         borderRadius="full"
@@ -315,7 +315,7 @@ const Profile = () => {
                                         user?.subscriptionStatus === 'trialing'
                                     ) ? (
                                         <Link
-                                            href={process.env.VITE_STRIPE_PREMIUM_LINK || '#'}
+                                            // href={process.env.VITE_STRIPE_PREMIUM_LINK || '#'}
                                             isExternal
                                             _hover={{ textDecoration: 'none' }}
                                         >
@@ -329,11 +329,11 @@ const Profile = () => {
                                         </Link>
                                     ) : (
                                         <Link
-                                            href={
-                                                process.env.VITE_STRIPE_PORTAL_LINK && user?.email
-                                                    ? `${process.env.VITE_STRIPE_PORTAL_LINK}?prefilled_email=${encodeURIComponent(user.email)}`
-                                                    : '#'
-                                            }
+                                            // href={
+                                            //     process.env.VITE_STRIPE_PORTAL_LINK && user?.email
+                                            //         ? `${process.env.VITE_STRIPE_PORTAL_LINK}?prefilled_email=${encodeURIComponent(user.email)}`
+                                            //         : '#'
+                                            // }
                                             isExternal
                                             _hover={{ textDecoration: 'none' }}
                                         >

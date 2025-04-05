@@ -63,30 +63,30 @@ const userRoutes = (app) => {
                 await user.save();
 
                 // Send verification email only for non-Google signups
-                const verificationUrl = `${process.env.FRONTEND_URL}/api/auth/verify-email?token=${user.verificationToken}&email=${encodeURIComponent(email)}`;
-                await transporter.sendMail({
-                    to: email,
-                    from: `"Turbocontent Team" <${process.env.EMAIL}>`, // Use a display name
-                    subject: 'Welcome to Turbocontent!',
-                    html: `
-                        <html>
-                        <body style="font-family: 'Arial', sans-serif; color: #333; line-height: 1.6;">
-                            <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
-                            <h1 style="color: #2c3e50; text-align: center;">Welcome to Turbocontent!</h1>
-                            <p>Hi ${firstName},</p>
-                            <p>Thanks for joining Turbocontent – your new tool to instantly generate engaging social media content!</p>
-                            <p>Please click the button below to verify your email address and activate your account:</p>
-                            <p style="text-align: center; margin: 25px 0;">
-                                <a href="${verificationUrl}" style="display: inline-block; padding: 12px 25px; background-color: #3498db; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify Your Email</a>
-                            </p>
-                            <p>Once verified, you can start creating platform-optimized posts with relevant images, text, hashtags, and alt text in seconds.</p>
-                            <p>If you have any questions, feel free to contact our support team.</p>
-                            <p>Best regards,<br>The Turbocontent Team</p>
-                            </div>
-                        </body>
-                        </html>
-                    `
-                });
+                // const verificationUrl = `${process.env.FRONTEND_URL}/api/auth/verify-email?token=${user.verificationToken}&email=${encodeURIComponent(email)}`;
+                // await transporter.sendMail({
+                //     to: email,
+                //     from: `"Turbocontent Team" <${process.env.EMAIL}>`, // Use a display name
+                //     subject: 'Welcome to Turbocontent!',
+                //     html: `
+                //         <html>
+                //         <body style="font-family: 'Arial', sans-serif; color: #333; line-height: 1.6;">
+                //             <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+                //             <h1 style="color: #2c3e50; text-align: center;">Welcome to Turbocontent!</h1>
+                //             <p>Hi ${firstName},</p>
+                //             <p>Thanks for joining Turbocontent – your new tool to instantly generate engaging social media content!</p>
+                //             <p>Please click the button below to verify your email address and activate your account:</p>
+                //             <p style="text-align: center; margin: 25px 0;">
+                //                 <a href="${verificationUrl}" style="display: inline-block; padding: 12px 25px; background-color: #3498db; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify Your Email</a>
+                //             </p>
+                //             <p>Once verified, you can start creating platform-optimized posts with relevant images, text, hashtags, and alt text in seconds.</p>
+                //             <p>If you have any questions, feel free to contact our support team.</p>
+                //             <p>Best regards,<br>The Turbocontent Team</p>
+                //             </div>
+                //         </body>
+                //         </html>
+                //     `
+                // });
             }
 
             // Generate token for immediate login after signup
