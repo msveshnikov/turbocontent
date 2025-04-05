@@ -4,7 +4,7 @@ Empowering users to effortlessly create compelling social media content. Simply 
 define your goal (engagement, promotion, etc.), select your target platform (Instagram, Facebook,
 Twitter, LinkedIn, Pinterest), and specify the desired tone (witty, informative, inspiring).
 
-[alt text](public/image.png)
+![](public/image.png)
 
 ## Project Architecture
 
