@@ -276,3 +276,5 @@ Turbocontent, leveraging the described project structure.
   infographic) and platform-specific content optimization.
 
 # TODO
+
+- add content history and endpoint
