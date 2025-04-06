@@ -21,132 +21,70 @@ import { UserContext } from './App';
 export default function Navbar() {
     const { isOpen, onToggle } = useDisclosure();
     const { user } = useContext(UserContext);
-    // const navigate = useNavigate();
     const bgColor = useColorModeValue('white', 'gray.800');
     const borderColor = useColorModeValue('gray.200', 'gray.700');
-
-    // const handleLogout = () => {
-    //     localStorage.removeItem('token');
-    //     setUser(null);
-    //     navigate('/');
-    // };
 
     const handleNavClick = () => {
         if (isOpen) onToggle();
     };
 
     const NAV_ITEMS = [
-        // { label: 'Docs', href: '/docs', requiresAuth: false },
-        // { label: 'Feedback', href: '/feedback', requiresAuth: false },
         ...(user?.isAdmin ? [{ label: 'Admin', href: '/admin', requiresAuth: true }] : [])
     ];
 
     const filteredNavItems = NAV_ITEMS.filter((item) => !item.requiresAuth || user?.email);
 
     return (
-        <Box position="sticky" top="0" zIndex="1000">
-            <Flex
-                bg={bgColor}
-                color={useColorModeValue('gray.600', 'white')}
-                minH="60px"
-                py={{ base: 2 }}
-                px={{ base: 4 }}
-                borderBottom={1}
-                borderStyle="solid"
-                borderColor={borderColor}
-                align="center"
-                boxShadow="sm"
-            >
+        filteredNavItems.length > 0 && (
+            <Box position="sticky" top="0" zIndex="1000">
                 <Flex
-                    flex={{ base: 1, md: 'auto' }}
-                    ml={{ base: -2 }}
-                    display={{ base: 'flex', md: 'none' }}
+                    bg={bgColor}
+                    minH="60px"
+                    py={{ base: 2 }}
+                    px={{ base: 4 }}
+                    borderBottom={1}
+                    borderStyle="solid"
+                    borderColor={borderColor}
+                    align="center"
+                    boxShadow="sm"
                 >
-                    {filteredNavItems.length > 0 && (
-                        <IconButton
-                            onClick={onToggle}
-                            icon={
-                                isOpen ? <CloseIcon w={3} h={3} /> : <HamburgerIcon w={5} h={5} />
-                            }
-                            variant="ghost"
-                            aria-label="Toggle Navigation"
-                        />
-                    )}
-                </Flex>
-                <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }} align="center">
-                    {/* <Image
-                        src={logo}
-                        alt="Turbocontent.art Logo"
-                        h="40px"
-                        mr={3}
-                        cursor="pointer"
-                        onClick={handleLogoClick}
-                    /> */}
-                    <Flex display={{ base: 'none', md: 'flex' }} ml={10}>
-                        <DesktopNav navItems={filteredNavItems} />
+                    <Flex
+                        flex={{ base: 1, md: 'auto' }}
+                        ml={{ base: -2 }}
+                        display={{ base: 'flex', md: 'none' }}
+                    >
+                        {filteredNavItems.length > 0 && (
+                            <IconButton
+                                onClick={onToggle}
+                                icon={
+                                    isOpen ? (
+                                        <CloseIcon w={3} h={3} />
+                                    ) : (
+                                        <HamburgerIcon w={5} h={5} />
+                                    )
+                                }
+                                variant="ghost"
+                                aria-label="Toggle Navigation"
+                            />
+                        )}
+                    </Flex>
+                    <Flex
+                        flex={{ base: 1 }}
+                        justify={{ base: 'center', md: 'start' }}
+                        align="center"
+                    >
+                        <Flex display={{ base: 'none', md: 'flex' }} ml={10}>
+                            <DesktopNav navItems={filteredNavItems} />
+                        </Flex>
                     </Flex>
                 </Flex>
-                {/* <Stack flex={{ base: 1, md: 0 }} justify="flex-end" direction="row" spacing={6}>
-                    {user?.email ? (
-                        <>
-                            <Button
-                                as={RouterLink}
-                                to="/profile"
-                                variant="ghost"
-                                fontSize="sm"
-                                fontWeight={400}
-                                onClick={handleNavClick}
-                            >
-                                Profile
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    handleNavClick();
-                                    handleLogout();
-                                }}
-                                colorScheme="red"
-                                variant="outline"
-                                fontSize="sm"
-                                fontWeight={600}
-                            >
-                                Sign Out
-                            </Button>
-                        </>
-                    ) : (
-                        <>
-                            <Button
-                                as={RouterLink}
-                                to="/login"
-                                variant="ghost"
-                                onClick={handleNavClick}
-                            >
-                                Login
-                            </Button>
-                            <Button
-                                as={RouterLink}
-                                to="/signup"
-                                display={{ base: 'none', md: 'inline-flex' }}
-                                fontSize="sm"
-                                fontWeight={600}
-                                color="white"
-                                bg="#3498DB"
-                                onClick={handleNavClick}
-                                _hover={{
-                                    bg: '#2980B9'
-                                }}
-                            >
-                                Sign Up
-                            </Button>
-                        </>
-                    )}
-                </Stack> */}
-            </Flex>
-            {filteredNavItems.length > 0 && (
-                <Collapse in={isOpen} animateOpacity>
-                    <MobileNav navItems={filteredNavItems} onNavClick={handleNavClick} />
-                </Collapse>
-            )}
-        </Box>
+                {filteredNavItems.length > 0 && (
+                    <Collapse in={isOpen} animateOpacity>
+                        <MobileNav navItems={filteredNavItems} onNavClick={handleNavClick} />
+                    </Collapse>
+                )}
+            </Box>
+        )
     );
 }
 

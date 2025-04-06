@@ -276,5 +276,3 @@ Turbocontent, leveraging the described project structure.
   infographic) and platform-specific content optimization.
 
 # TODO
-
-- use all params for generate endpoint in backend

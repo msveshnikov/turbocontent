@@ -64,7 +64,7 @@ const SignUp = () => {
                         duration: 2000,
                         isClosable: true
                     });
-                    window.location.href = '/presentation';
+                    window.location.href = '/content';
                 } else {
                     toast({
                         title: 'Account created',

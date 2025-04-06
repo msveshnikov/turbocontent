@@ -212,8 +212,8 @@ function Content() {
                         )}
                         <VStack spacing={5} align="stretch">
                             <FormControl id="topic" isRequired>
-                                <Tooltip label="Enter the main topic you want to create content about. Be specific for better results.">
-                                    <FormLabel>Topic</FormLabel>
+                                <Tooltip label="Enter the main topic you want to create content about. Be specific for better results. Optionally provide a URL for context or reference related to the topic.">
+                                    <FormLabel>Topic or URL</FormLabel>
                                 </Tooltip>
                                 <Input
                                     type="text"

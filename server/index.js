@@ -15,6 +15,7 @@ import userRoutes from './user.js';
 import adminRoutes from './admin.js';
 import { authenticateTokenOptional } from './middleware/auth.js';
 import { getTextImageContent } from './gemini.js';
+import { promises as fsPromises } from 'fs';
 
 dotenv.config();
 
@@ -136,6 +137,45 @@ app.post('/api/generate-content', authenticateTokenOptional, async (req, res) =>
     } catch (error) {
         console.error('Error processing generate-content request:', error);
         res.status(500).json({ error: 'Failed to generate content', details: error.message });
+    }
+});
+
+app.get('/api/docs', async (req, res) => {
+    try {
+        const search = req.query.search ? req.query.search.toLowerCase() : '';
+        const categoryQuery =
+            req.query.category && req.query.category !== 'all'
+                ? req.query.category.toLowerCase()
+                : null;
+        const docsPath = join(__dirname, '../docs');
+        const filenames = await fsPromises.readdir(docsPath);
+        const docsData = await Promise.all(
+            filenames.map(async (filename) => {
+                const filePath = join(docsPath, filename);
+                const content = await fsPromises.readFile(filePath, 'utf8');
+                const title = filename.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ');
+                const category = 'general';
+                return { title, category, content, filename };
+            })
+        );
+        let filteredDocs = docsData;
+        if (categoryQuery) {
+            filteredDocs = filteredDocs.filter(
+                (doc) =>
+                    doc.category.toLowerCase().includes(categoryQuery) ||
+                    doc.filename.toLowerCase().includes(categoryQuery)
+            );
+        }
+        if (search) {
+            filteredDocs = filteredDocs.filter(
+                (doc) =>
+                    doc.title.toLowerCase().includes(search) ||
+                    doc.content.toLowerCase().includes(search)
+            );
+        }
+        res.json(filteredDocs);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
 });
 
