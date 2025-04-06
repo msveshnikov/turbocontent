@@ -16,6 +16,7 @@ import adminRoutes from './admin.js';
 import { authenticateTokenOptional } from './middleware/auth.js';
 import { getTextImageContent } from './gemini.js';
 import { promises as fsPromises } from 'fs';
+import { fetchSearchResults, searchWebContent } from './search.js';
 
 dotenv.config();
 
@@ -82,10 +83,16 @@ app.post('/api/generate-content', authenticateTokenOptional, async (req, res) =>
             });
         }
 
+        const webSearchContent = await fetchSearchResults(topic);
+        let webContent = await searchWebContent(webSearchContent);
+
         let prompt = `Generate a social media post about the topic: "${topic}".
             The goal of the post is to "${goal}".
             The target platform is ${platform}.
             The desired tone is ${tone}.
+            Research the web and think about the topic before generating. Web search results
+                <web_search_results>${JSON.stringify(webSearchContent)}</web_search_results>
+                <web_content>${webContent}</web_content>
             Word count should be approximately ${wordCount} words.`;
 
         if (customInstructions) {
@@ -99,7 +106,7 @@ app.post('/api/generate-content', authenticateTokenOptional, async (req, res) =>
         prompt += `\n\nPost option should include:
             - Engaging text optimized for the platform.
             - Relevant images and hashtags.
-            - Always include at least 1 image (better 3, in the middle of the text, to illustrate parts).
+            - Always include at least 3 images inside text.
 
             Return the response as markdown`;
 
