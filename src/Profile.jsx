@@ -396,58 +396,57 @@ const Profile = () => {
                 </Card>
 
                 {/* Generated Content Card */}
-                <Card bg={cardBg} shadow="md">
-                    <CardBody>
-                        <VStack spacing={4} width="100%" align="stretch">
-                            <Heading size="lg" mb={2}>
-                                Generated Content History
-                            </Heading>
 
-                            <InputGroup>
-                                <InputLeftElement pointerEvents="none" color="gray.400">
-                                    <Search2Icon />
-                                </InputLeftElement>
+                <VStack spacing={4} width="100%" align="stretch">
+                    <Heading size="lg" mb={2}>
+                        Generated Content History
+                    </Heading>
 
-                                <Input
-                                    type="text"
-                                    placeholder="Search history by topic, platform, goal, tone, or content..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </InputGroup>
+                    <InputGroup>
+                        <InputLeftElement pointerEvents="none" color="gray.400">
+                            <Search2Icon />
+                        </InputLeftElement>
 
-                            {contentLoading ? (
-                                <Center py={10}>
-                                    <Spinner size="lg" />
-                                    <Text ml={4}>Loading generated content...</Text>
-                                </Center>
-                            ) : filteredContentList.length === 0 ? (
-                                <Center py={10}>
-                                    <Text color="gray.500">
-                                        {contentList.length === 0
-                                            ? "You haven't generated any content yet."
-                                            : 'No content matches your search.'}
-                                    </Text>
-                                </Center>
-                            ) : (
-                                <Table variant="simple" size="md">
-                                    <Thead bg={tableHeaderBg}>
-                                        <Tr>
-                                            <Th>Topic</Th>
-                                            <Th>Platform</Th>
-                                            {/* <Th>Goal</Th>
+                        <Input
+                            type="text"
+                            placeholder="Search history by topic, platform, goal, tone, or content..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </InputGroup>
+
+                    {contentLoading ? (
+                        <Center py={10}>
+                            <Spinner size="lg" />
+                            <Text ml={4}>Loading generated content...</Text>
+                        </Center>
+                    ) : filteredContentList.length === 0 ? (
+                        <Center py={10}>
+                            <Text color="gray.500">
+                                {contentList.length === 0
+                                    ? "You haven't generated any content yet."
+                                    : 'No content matches your search.'}
+                            </Text>
+                        </Center>
+                    ) : (
+                        <Table variant="simple" size="md">
+                            <Thead bg={tableHeaderBg}>
+                                <Tr>
+                                    <Th>Topic</Th>
+                                    {/* <Th>Platform</Th> */}
+                                    {/* <Th>Goal</Th>
                                                 <Th>Tone</Th> */}
-                                            <Th>Actions</Th>
-                                        </Tr>
-                                    </Thead>
-                                    <Tbody>
-                                        {filteredContentList.map((content) => (
-                                            <Fragment key={content._id}>
-                                                <Tr key={content._id}>
-                                                    <Td maxW="200px" whiteSpace="normal">
-                                                        {content.topic || '-'}
-                                                    </Td>
-                                                    <Td>
+                                    <Th>Actions</Th>
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {filteredContentList.map((content) => (
+                                    <Fragment key={content._id}>
+                                        <Tr key={content._id}>
+                                            <Td maxW="200px" whiteSpace="normal">
+                                                {content.topic || '-'}
+                                            </Td>
+                                            {/* <Td>
                                                         <Badge
                                                             colorScheme={getPlatformColorScheme(
                                                                 content.platform
@@ -455,126 +454,116 @@ const Profile = () => {
                                                         >
                                                             {content.platform || '-'}
                                                         </Badge>
-                                                    </Td>
-                                                    {/* <Td>{content.goal || '-'}</Td>
+                                                    </Td> */}
+                                            {/* <Td>{content.goal || '-'}</Td>
                                                         <Td>{content.tone || '-'}</Td> */}
 
-                                                    <Td>
-                                                        <Stack direction="row" spacing={2}>
-                                                            <IconButton
-                                                                icon={<ViewIcon />}
-                                                                aria-label="View Content Details"
-                                                                size="sm"
-                                                                variant="outline"
-                                                                onClick={() =>
-                                                                    toggleContentExpansion(
-                                                                        content._id
-                                                                    )
-                                                                }
-                                                                isActive={
-                                                                    expandedContentId ===
-                                                                    content._id
-                                                                }
-                                                            />
-                                                            <IconButton
-                                                                icon={<DeleteIcon />}
-                                                                aria-label="Delete Content"
-                                                                size="sm"
-                                                                colorScheme="red"
-                                                                variant="outline"
-                                                                onClick={() =>
-                                                                    handleDeleteContent(content._id)
-                                                                }
-                                                            />
-                                                        </Stack>
-                                                    </Td>
-                                                </Tr>
-                                                {/* Collapsible Row for Details */}
-                                                <Tr key={`${content._id}-details`} p={0} m={0}>
-                                                    <Td colSpan={6} p={0} m={0} border="none">
-                                                        <Collapse
-                                                            in={expandedContentId === content._id}
-                                                            animateOpacity
-                                                            style={{ width: '100%' }}
-                                                        >
-                                                            <VStack align="start" spacing={4}>
-                                                                {
-                                                                    <Box
-                                                                        overflowX="auto"
-                                                                        bg="white"
-                                                                        p={4}
-                                                                        shadow="md"
-                                                                        borderWidth="1px"
-                                                                        borderRadius="md"
-                                                                    >
-                                                                        <Text
-                                                                            fontSize="md"
-                                                                            whiteSpace="pre-line"
-                                                                            dangerouslySetInnerHTML={{
-                                                                                __html: markdownToJSX(
-                                                                                    content.content
-                                                                                )
-                                                                            }}
-                                                                        />
-                                                                    </Box>
-                                                                }
+                                            <Td>
+                                                <Stack direction="row" spacing={2}>
+                                                    <IconButton
+                                                        icon={<ViewIcon />}
+                                                        aria-label="View Content Details"
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            toggleContentExpansion(content._id)
+                                                        }
+                                                        isActive={expandedContentId === content._id}
+                                                    />
+                                                    <IconButton
+                                                        icon={<DeleteIcon />}
+                                                        aria-label="Delete Content"
+                                                        size="sm"
+                                                        colorScheme="red"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            handleDeleteContent(content._id)
+                                                        }
+                                                    />
+                                                </Stack>
+                                            </Td>
+                                        </Tr>
+                                        {/* Collapsible Row for Details */}
+                                        <Tr key={`${content._id}-details`} p={0} m={0}>
+                                            <Td colSpan={6} p={0} m={0} border="none">
+                                                <Collapse
+                                                    in={expandedContentId === content._id}
+                                                    animateOpacity
+                                                    style={{ width: '100%' }}
+                                                >
+                                                    <VStack align="start" spacing={4}>
+                                                        {
+                                                            <Box
+                                                                overflowX="auto"
+                                                                bg="white"
+                                                                p={4}
+                                                                shadow="md"
+                                                                borderWidth="1px"
+                                                                borderRadius="md"
+                                                            >
                                                                 <Text
-                                                                    fontSize="xs"
-                                                                    color="gray.500"
-                                                                >
-                                                                    Generated on:{' '}
-                                                                    {content.createdAt
-                                                                        ? new Date(
-                                                                              content.createdAt
-                                                                          ).toLocaleString()
-                                                                        : 'N/A'}
-                                                                </Text>
-                                                            </VStack>
-                                                        </Collapse>
-                                                    </Td>
-                                                </Tr>
-                                            </Fragment>
-                                        ))}
-                                    </Tbody>
-                                </Table>
-                            )}
-                        </VStack>
-                    </CardBody>
-                </Card>
+                                                                    fontSize="md"
+                                                                    whiteSpace="pre-line"
+                                                                    dangerouslySetInnerHTML={{
+                                                                        __html: markdownToJSX(
+                                                                            content.content
+                                                                        )
+                                                                    }}
+                                                                />
+                                                            </Box>
+                                                        }
+                                                        <Text fontSize="xs" color="gray.500">
+                                                            Generated on:{' '}
+                                                            {content.createdAt
+                                                                ? new Date(
+                                                                      content.createdAt
+                                                                  ).toLocaleString()
+                                                                : 'N/A'}
+                                                        </Text>
+                                                    </VStack>
+                                                </Collapse>
+                                            </Td>
+                                        </Tr>
+                                    </Fragment>
+                                ))}
+                            </Tbody>
+                        </Table>
+                    )}
+                </VStack>
             </VStack>
         </Container>
     );
 };
 
 // Helper function to get color scheme based on platform
-const getPlatformColorScheme = (platform) => {
-    const lowerPlatform = platform?.toLowerCase();
-    switch (lowerPlatform) {
-        case 'instagram':
-            return 'pink';
-        case 'facebook':
-            return 'facebook';
-        case 'twitter':
-            return 'twitter';
-        case 'linkedin':
-            return 'linkedin';
-        case 'pinterest':
-            return 'red';
-        case 'youtube':
-            return 'red';
-        case 'tiktok':
-            return 'blackAlpha';
-        case 'snapchat':
-            return 'yellow';
-        case 'twitch':
-            return 'purple';
-        case 'reddit':
-            return 'orange';
-        case 'discord':
-            return 'purple';
-        default:
-            return 'gray';
-    }
-};
+// const getPlatformColorScheme = (platform) => {
+//     const lowerPlatform = platform?.toLowerCase();
+//     switch (lowerPlatform) {
+//         case 'instagram':
+//             return 'pink';
+//         case 'facebook':
+//             return 'facebook';
+//         case 'twitter':
+//             return 'twitter';
+//         case 'linkedin':
+//             return 'linkedin';
+//         case 'pinterest':
+//             return 'red';
+//         case 'youtube':
+//             return 'red';
+//         case 'tiktok':
+//             return 'blackAlpha';
+//         case 'snapchat':
+//             return 'yellow';
+//         case 'twitch':
+//             return 'purple';
+//         case 'reddit':
+//             return 'orange';
+//         case 'discord':
+//             return 'purple';
+//         default:
+//             return 'gray';
+//     }
+// };
 
 export default Profile;

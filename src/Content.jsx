@@ -11,8 +11,6 @@ import {
     Spinner,
     Text,
     Textarea,
-    Card,
-    CardBody,
     Flex,
     Spacer,
     IconButton,
@@ -377,74 +375,72 @@ function Content() {
                     </TabPanel>
                     <TabPanel pt={4} p={0}>
                         {generatedContent && (
-                            <Card>
-                                <CardBody>
-                                    <Flex mb={4} align="center">
-                                        <Heading size="md">
-                                            {isEditing
-                                                ? 'Edit Generated Content'
-                                                : 'Generated Content Preview'}
-                                        </Heading>
-                                        <Spacer />
-                                        <HStack>
-                                            {!isEditing && (
-                                                <Tooltip label="Edit Content">
-                                                    <IconButton
-                                                        icon={<EditIcon />}
-                                                        aria-label="Edit Content"
-                                                        size="sm"
-                                                        onClick={handleEditToggle}
-                                                        mr={2}
-                                                    />
-                                                </Tooltip>
-                                            )}
-                                            {isEditing && (
-                                                <Tooltip label="Save Edits">
-                                                    <IconButton
-                                                        icon={<CheckIcon />}
-                                                        aria-label="Save Edits"
-                                                        size="sm"
-                                                        colorScheme="green"
-                                                        onClick={handleSaveEdit}
-                                                        mr={2}
-                                                    />
-                                                </Tooltip>
-                                            )}
-                                            <Tooltip label="Copy to clipboard">
+                            <>
+                                <Flex mb={4} align="center">
+                                    <Heading size="md">
+                                        {isEditing
+                                            ? 'Edit Generated Content'
+                                            : 'Generated Content Preview'}
+                                    </Heading>
+                                    <Spacer />
+                                    <HStack>
+                                        {!isEditing && (
+                                            <Tooltip label="Edit Content">
                                                 <IconButton
-                                                    icon={isCopied ? <CheckIcon /> : <CopyIcon />}
-                                                    aria-label="Copy to clipboard"
+                                                    icon={<EditIcon />}
+                                                    aria-label="Edit Content"
                                                     size="sm"
-                                                    colorScheme={isCopied ? 'green' : 'blue'}
-                                                    onClick={handleCopyToClipboard}
+                                                    onClick={handleEditToggle}
+                                                    mr={2}
                                                 />
                                             </Tooltip>
-                                        </HStack>
-                                    </Flex>
-
-                                    {isEditing ? (
-                                        <FormControl>
-                                            <Textarea
-                                                value={editedContent}
-                                                onChange={handleContentChange}
-                                                rows={10}
-                                                borderRadius="md"
-                                                borderWidth="1px"
-                                                borderColor="gray.300"
-                                                _focus={{ borderColor: 'primary.500' }}
+                                        )}
+                                        {isEditing && (
+                                            <Tooltip label="Save Edits">
+                                                <IconButton
+                                                    icon={<CheckIcon />}
+                                                    aria-label="Save Edits"
+                                                    size="sm"
+                                                    colorScheme="green"
+                                                    onClick={handleSaveEdit}
+                                                    mr={2}
+                                                />
+                                            </Tooltip>
+                                        )}
+                                        <Tooltip label="Copy to clipboard">
+                                            <IconButton
+                                                icon={isCopied ? <CheckIcon /> : <CopyIcon />}
+                                                aria-label="Copy to clipboard"
+                                                size="sm"
+                                                colorScheme={isCopied ? 'green' : 'blue'}
+                                                onClick={handleCopyToClipboard}
                                             />
-                                        </FormControl>
-                                    ) : (
-                                        <Text
-                                            fontSize="md"
-                                            whiteSpace="pre-line"
-                                            dangerouslySetInnerHTML={{
-                                                __html: markdownToJSX(generatedContent)
-                                            }}
+                                        </Tooltip>
+                                    </HStack>
+                                </Flex>
+
+                                {isEditing ? (
+                                    <FormControl>
+                                        <Textarea
+                                            value={editedContent}
+                                            onChange={handleContentChange}
+                                            rows={10}
+                                            borderRadius="md"
+                                            borderWidth="1px"
+                                            borderColor="gray.300"
+                                            _focus={{ borderColor: 'primary.500' }}
                                         />
-                                    )}
-                                </CardBody>
-                            </Card>
+                                    </FormControl>
+                                ) : (
+                                    <Text
+                                        fontSize="md"
+                                        whiteSpace="pre-line"
+                                        dangerouslySetInnerHTML={{
+                                            __html: markdownToJSX(generatedContent)
+                                        }}
+                                    />
+                                )}
+                            </>
                         )}
                     </TabPanel>
                 </TabPanels>
