@@ -17,6 +17,7 @@ import { authenticateTokenOptional } from './middleware/auth.js';
 import { getTextImageContent } from './gemini.js';
 import { promises as fsPromises } from 'fs';
 import { fetchSearchResults, searchWebContent } from './search.js';
+import { enrichMetadata } from './utils.js';
 
 dotenv.config();
 
@@ -193,7 +194,12 @@ app.get('/', async (req, res) => {
 
 app.get('*', async (req, res) => {
     const html = fs.readFileSync(join(__dirname, '../dist/index.html'), 'utf8');
-    return res.send(html);
+    if (!req.path.startsWith('/content/')) {
+        return res.send(html);
+    }
+    const slug = req.path.substring(6);
+    const enrichedHtml = await enrichMetadata(html, slug);
+    res.send(enrichedHtml);
 });
 
 app.use((req, res) => {
