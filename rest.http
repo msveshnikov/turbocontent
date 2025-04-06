@@ -5,3 +5,4 @@ GET https://turbocontent.art/sitemap.xml
 GET http://localhost:3000/sitemap.xml
 
 ###
+ GET http://localhost:3000/content/67f2231f1a4cbb6a0dc355fa

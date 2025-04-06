@@ -187,6 +187,41 @@ app.get('/api/docs', async (req, res) => {
     }
 });
 
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        const contents = await Content.find();
+        const staticRoutes = [
+            '/',
+            '/content',
+            '/presentation',
+            '/insights',
+            '/privacy',
+            '/terms',
+            '/login',
+            '/signup',
+            '/forgot',
+            '/profile',
+            '/feedback',
+            '/admin',
+            '/docs'
+        ];
+        let urls = staticRoutes
+            .map((route) => `<url><loc>https://turbocontent.art${route}</loc></url>`)
+            .join('');
+        contents.forEach((p) => {
+            urls += `<url><loc>https://turbocontent.art/content/${p._id}</loc></url>`;
+        });
+        const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>`;
+        res.header('Content-Type', 'application/xml');
+        res.send(sitemap);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
 app.get('/', async (req, res) => {
     const html = fs.readFileSync(join(__dirname, '../dist/landing.html'), 'utf8');
     res.send(html);
@@ -197,7 +232,7 @@ app.get('*', async (req, res) => {
     if (!req.path.startsWith('/content/')) {
         return res.send(html);
     }
-    const slug = req.path.substring(6);
+    const slug = req.path.substring(9);
     const enrichedHtml = await enrichMetadata(html, slug);
     res.send(enrichedHtml);
 });
