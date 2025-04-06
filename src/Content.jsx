@@ -64,7 +64,7 @@ function Content() {
     const [isCopied, setIsCopied] = useState(false);
     const toast = useToast();
     const [customInstructions, setCustomInstructions] = useState('');
-    const [wordCount, setWordCount] = useState(50);
+    const [wordCount, setWordCount] = useState(500);
     const [isEditing, setIsEditing] = useState(false);
     const [editedContent, setEditedContent] = useState('');
     const [keywords, setKeywords] = useState([]);
@@ -84,7 +84,7 @@ function Content() {
         setIsCopied(false);
 
         const contentOptions = {
-            wordCount: parseInt(wordCount, 10) || 50,
+            wordCount: parseInt(wordCount, 10) || 500,
             customInstructions: customInstructions,
             keywords: keywords.map((keyword) => keyword.text)
         };
@@ -300,8 +300,8 @@ function Content() {
                                     value={wordCount}
                                     onChange={(e) => setWordCount(e.target.value)}
                                     placeholder="Enter desired word count"
-                                    min="10"
-                                    max="500"
+                                    min="50"
+                                    max="5000"
                                 />
                             </FormControl>
 
