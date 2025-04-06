@@ -1,5 +1,4 @@
 import {
-    Box,
     VStack,
     Heading,
     FormControl,
@@ -185,7 +184,7 @@ function Content() {
     };
 
     return (
-        <Box p={5} shadow="md" borderWidth="1px" borderRadius="md" bg="white">
+        <>
             <Heading size="lg" mb={4} textAlign="center">
                 Social Media Content Generator
             </Heading>
@@ -436,23 +435,13 @@ function Content() {
                                             />
                                         </FormControl>
                                     ) : (
-                                        <Box
-                                            bg="white"
-                                            p={4}
-                                            shadow="inner"
-                                            borderWidth="1px"
-                                            borderRadius="md"
-                                            ref={contentPreviewRef}
-                                            minHeight="200px"
-                                        >
-                                            <Text
-                                                fontSize="md"
-                                                whiteSpace="pre-line"
-                                                dangerouslySetInnerHTML={{
-                                                    __html: markdownToJSX(generatedContent)
-                                                }}
-                                            />
-                                        </Box>
+                                        <Text
+                                            fontSize="md"
+                                            whiteSpace="pre-line"
+                                            dangerouslySetInnerHTML={{
+                                                __html: markdownToJSX(generatedContent)
+                                            }}
+                                        />
                                     )}
                                 </CardBody>
                             </Card>
@@ -460,7 +449,7 @@ function Content() {
                     </TabPanel>
                 </TabPanels>
             </Tabs>
-        </Box>
+        </>
     );
 }
 

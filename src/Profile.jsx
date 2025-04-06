@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, Fragment } from 'react';
 import {
     Box,
     Button,
@@ -33,7 +33,6 @@ import {
 } from '@chakra-ui/react';
 import { API_URL, UserContext } from './App';
 import { DeleteIcon, ViewIcon, Search2Icon, ExternalLinkIcon } from '@chakra-ui/icons';
-import { formatDistanceToNow } from 'date-fns';
 import { markdownToJSX } from './Content';
 
 const Profile = () => {
@@ -48,7 +47,6 @@ const Profile = () => {
 
     const cardBg = useColorModeValue('white', 'gray.700');
     const tableHeaderBg = useColorModeValue('gray.50', 'gray.600');
-    const detailCardBg = useColorModeValue('gray.50', 'gray.800');
     const borderColor = useColorModeValue('gray.200', 'gray.600');
 
     // Fetch user profile data if not already loaded (e.g., on page refresh)
@@ -432,150 +430,113 @@ const Profile = () => {
                                     </Text>
                                 </Center>
                             ) : (
-                                <Box overflowX="auto">
-                                    <Table variant="simple" size="md">
-                                        <Thead bg={tableHeaderBg}>
-                                            <Tr>
-                                                <Th>Topic</Th>
-                                                <Th>Platform</Th>
-                                                <Th>Goal</Th>
-                                                <Th>Tone</Th>
-                                                <Th>Created</Th>
-                                                <Th>Actions</Th>
-                                            </Tr>
-                                        </Thead>
-                                        <Tbody>
-                                            {filteredContentList.map((content) => (
-                                                <>
-                                                    <Tr key={content._id}>
-                                                        <Td
-                                                            maxW="200px"
-                                                            whiteSpace="normal"
-                                                            wordBreak="break-word"
+                                <Table variant="simple" size="md">
+                                    <Thead bg={tableHeaderBg}>
+                                        <Tr>
+                                            <Th>Topic</Th>
+                                            <Th>Platform</Th>
+                                            {/* <Th>Goal</Th>
+                                                <Th>Tone</Th> */}
+                                            <Th>Actions</Th>
+                                        </Tr>
+                                    </Thead>
+                                    <Tbody>
+                                        {filteredContentList.map((content) => (
+                                            <Fragment key={content._id}>
+                                                <Tr key={content._id}>
+                                                    <Td maxW="200px" whiteSpace="normal">
+                                                        {content.topic || '-'}
+                                                    </Td>
+                                                    <Td>
+                                                        <Badge
+                                                            colorScheme={getPlatformColorScheme(
+                                                                content.platform
+                                                            )}
                                                         >
-                                                            {content.topic || '-'}
-                                                        </Td>
-                                                        <Td>
-                                                            <Badge
-                                                                colorScheme={getPlatformColorScheme(
-                                                                    content.platform
-                                                                )}
-                                                            >
-                                                                {content.platform || '-'}
-                                                            </Badge>
-                                                        </Td>
-                                                        <Td>{content.goal || '-'}</Td>
-                                                        <Td>{content.tone || '-'}</Td>
-                                                        <Td whiteSpace="nowrap">
-                                                            {content.createdAt
-                                                                ? formatDistanceToNow(
-                                                                      new Date(content.createdAt),
-                                                                      { addSuffix: true }
-                                                                  )
-                                                                : '-'}
-                                                        </Td>
-                                                        <Td>
-                                                            <Stack direction="row" spacing={2}>
-                                                                <IconButton
-                                                                    icon={<ViewIcon />}
-                                                                    aria-label="View Content Details"
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    onClick={() =>
-                                                                        toggleContentExpansion(
-                                                                            content._id
-                                                                        )
-                                                                    }
-                                                                    isActive={
-                                                                        expandedContentId ===
+                                                            {content.platform || '-'}
+                                                        </Badge>
+                                                    </Td>
+                                                    {/* <Td>{content.goal || '-'}</Td>
+                                                        <Td>{content.tone || '-'}</Td> */}
+
+                                                    <Td>
+                                                        <Stack direction="row" spacing={2}>
+                                                            <IconButton
+                                                                icon={<ViewIcon />}
+                                                                aria-label="View Content Details"
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() =>
+                                                                    toggleContentExpansion(
                                                                         content._id
-                                                                    }
-                                                                />
-                                                                <IconButton
-                                                                    icon={<DeleteIcon />}
-                                                                    aria-label="Delete Content"
-                                                                    size="sm"
-                                                                    colorScheme="red"
-                                                                    variant="outline"
-                                                                    onClick={() =>
-                                                                        handleDeleteContent(
-                                                                            content._id
-                                                                        )
-                                                                    }
-                                                                />
-                                                            </Stack>
-                                                        </Td>
-                                                    </Tr>
-                                                    {/* Collapsible Row for Details */}
-                                                    <Tr key={`${content._id}-details`} p={0} m={0}>
-                                                        <Td colSpan={6} p={0} m={0} border="none">
-                                                            <Collapse
-                                                                in={
+                                                                    )
+                                                                }
+                                                                isActive={
                                                                     expandedContentId ===
                                                                     content._id
                                                                 }
-                                                                animateOpacity
-                                                                style={{ width: '100%' }}
-                                                            >
-                                                                <Box
-                                                                    p={4}
-                                                                    bg={detailCardBg}
-                                                                    borderTopWidth="1px"
-                                                                    borderColor={borderColor}
-                                                                >
-                                                                    <VStack
-                                                                        align="start"
-                                                                        spacing={4}
+                                                            />
+                                                            <IconButton
+                                                                icon={<DeleteIcon />}
+                                                                aria-label="Delete Content"
+                                                                size="sm"
+                                                                colorScheme="red"
+                                                                variant="outline"
+                                                                onClick={() =>
+                                                                    handleDeleteContent(content._id)
+                                                                }
+                                                            />
+                                                        </Stack>
+                                                    </Td>
+                                                </Tr>
+                                                {/* Collapsible Row for Details */}
+                                                <Tr key={`${content._id}-details`} p={0} m={0}>
+                                                    <Td colSpan={6} p={0} m={0} border="none">
+                                                        <Collapse
+                                                            in={expandedContentId === content._id}
+                                                            animateOpacity
+                                                            style={{ width: '100%' }}
+                                                        >
+                                                            <VStack align="start" spacing={4}>
+                                                                {
+                                                                    <Box
+                                                                        overflowX="auto"
+                                                                        bg="white"
+                                                                        p={4}
+                                                                        shadow="md"
+                                                                        borderWidth="1px"
+                                                                        borderRadius="md"
                                                                     >
-                                                                        {
-                                                                            <Box mt={8}>
-                                                                                <Heading
-                                                                                    size="md"
-                                                                                    mb={4}
-                                                                                >
-                                                                                    Generated
-                                                                                    Content
-                                                                                </Heading>
-                                                                                <Box
-                                                                                    bg="white"
-                                                                                    p={4}
-                                                                                    shadow="md"
-                                                                                    borderWidth="1px"
-                                                                                    borderRadius="md"
-                                                                                >
-                                                                                    <Text
-                                                                                        fontSize="md"
-                                                                                        whiteSpace="pre-line"
-                                                                                        dangerouslySetInnerHTML={{
-                                                                                            __html: markdownToJSX(
-                                                                                                content.content
-                                                                                            )
-                                                                                        }}
-                                                                                    />
-                                                                                </Box>
-                                                                            </Box>
-                                                                        }
                                                                         <Text
-                                                                            fontSize="xs"
-                                                                            color="gray.500"
-                                                                        >
-                                                                            Generated on:{' '}
-                                                                            {content.createdAt
-                                                                                ? new Date(
-                                                                                      content.createdAt
-                                                                                  ).toLocaleString()
-                                                                                : 'N/A'}
-                                                                        </Text>
-                                                                    </VStack>
-                                                                </Box>
-                                                            </Collapse>
-                                                        </Td>
-                                                    </Tr>
-                                                </>
-                                            ))}
-                                        </Tbody>
-                                    </Table>
-                                </Box>
+                                                                            fontSize="md"
+                                                                            whiteSpace="pre-line"
+                                                                            dangerouslySetInnerHTML={{
+                                                                                __html: markdownToJSX(
+                                                                                    content.content
+                                                                                )
+                                                                            }}
+                                                                        />
+                                                                    </Box>
+                                                                }
+                                                                <Text
+                                                                    fontSize="xs"
+                                                                    color="gray.500"
+                                                                >
+                                                                    Generated on:{' '}
+                                                                    {content.createdAt
+                                                                        ? new Date(
+                                                                              content.createdAt
+                                                                          ).toLocaleString()
+                                                                        : 'N/A'}
+                                                                </Text>
+                                                            </VStack>
+                                                        </Collapse>
+                                                    </Td>
+                                                </Tr>
+                                            </Fragment>
+                                        ))}
+                                    </Tbody>
+                                </Table>
                             )}
                         </VStack>
                     </CardBody>
