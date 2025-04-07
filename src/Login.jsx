@@ -81,7 +81,7 @@ const Login = () => {
         <Container maxW="container.sm" py={8}>
             <Box>
                 <VStack spacing={6} align="stretch">
-                    <Heading as="h1" size="xl" textAlign="center" color="#3498DB">
+                    <Heading as="h1" size="xl" textAlign="center">
                         Log In
                     </Heading>
                     <form onSubmit={handleSubmit}>
@@ -92,8 +92,6 @@ const Login = () => {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    borderColor="#2471A3"
-                                    _hover={{ borderColor: '#2980B9' }}
                                 />
                             </FormControl>
                             <FormControl isRequired>
@@ -102,18 +100,13 @@ const Login = () => {
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    borderColor="#2471A3"
-                                    _hover={{ borderColor: '#2980B9' }}
                                 />
                             </FormControl>
                             <Button
                                 type="submit"
-                                bg="#3498DB"
-                                color="white"
                                 width="full"
                                 isLoading={isLoading}
                                 size="lg"
-                                _hover={{ bg: '#2980B9' }}
                             >
                                 Log In
                             </Button>
@@ -126,14 +119,11 @@ const Login = () => {
                         </VStack>
                     </form>
                     <VStack spacing={2}>
-                        <ChakraLink onClick={handleForgotPassword} color="#2980B9" cursor="pointer">
+                        <ChakraLink onClick={handleForgotPassword} cursor="pointer">
                             Forgot Password?
                         </ChakraLink>
                         <Text>
-                            Don&apos;t have an account?{' '}
-                            <Link to="/signup" style={{ color: '#2980B9' }}>
-                                Sign up
-                            </Link>
+                            Don&apos;t have an account? <Link to="/signup">Sign up</Link>
                         </Text>
                     </VStack>
                 </VStack>

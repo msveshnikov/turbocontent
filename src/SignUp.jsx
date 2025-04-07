@@ -90,16 +90,9 @@ const SignUp = () => {
 
     return (
         <Container maxW="container.sm" py={8}>
-            <Box
-                bg="white"
-                p={8}
-                rounded="lg"
-                boxShadow="lg"
-                borderWidth={1}
-                borderColor="gray.200"
-            >
+            <Box bg="white" p={8} rounded="lg" boxShadow="lg" borderWidth={1}>
                 <VStack spacing={6} align="stretch">
-                    <Heading as="h1" size="xl" textAlign="center" color="#3498DB">
+                    <Heading as="h1" size="xl" textAlign="center">
                         Sign Up
                     </Heading>
                     <form onSubmit={handleSubmit}>
@@ -111,8 +104,6 @@ const SignUp = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="Enter your email"
-                                    borderColor="gray.300"
-                                    _hover={{ borderColor: '#2980B9' }}
                                 />
                             </FormControl>
                             <FormControl isRequired>
@@ -123,8 +114,6 @@ const SignUp = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Create a password"
                                     minLength={8}
-                                    borderColor="gray.300"
-                                    _hover={{ borderColor: '#2980B9' }}
                                 />
                             </FormControl>
                             <FormControl>
@@ -134,8 +123,6 @@ const SignUp = () => {
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
                                     placeholder="Enter your first name"
-                                    borderColor="gray.300"
-                                    _hover={{ borderColor: '#2980B9' }}
                                 />
                             </FormControl>
                             <FormControl>
@@ -145,29 +132,16 @@ const SignUp = () => {
                                     value={lastName}
                                     onChange={(e) => setLastName(e.target.value)}
                                     placeholder="Enter your last name"
-                                    borderColor="gray.300"
-                                    _hover={{ borderColor: '#2980B9' }}
                                 />
                             </FormControl>
-                            <Button
-                                type="submit"
-                                bg="#3498DB"
-                                color="white"
-                                width="full"
-                                isLoading={isLoading}
-                                size="lg"
-                                _hover={{ bg: '#2980B9' }}
-                            >
+                            <Button type="submit" width="full" isLoading={isLoading} size="lg">
                                 Sign Up
                             </Button>
                             <GoogleLogin theme="outline" size="large" onSuccess={googleLogin} />
                         </VStack>
                     </form>
                     <Text textAlign="center">
-                        Already have an account?{' '}
-                        <Link to="/login" style={{ color: '#34A853' }}>
-                            Log in
-                        </Link>
+                        Already have an account? <Link to="/login">Log in</Link>
                     </Text>
                 </VStack>
             </Box>

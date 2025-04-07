@@ -46,6 +46,28 @@ and development of application components.
 This section outlines key design principles and considerations guiding the development of
 Turbocontent, leveraging the described project structure.
 
+### 2. Brand Identity
+
+- **Logo:** Turbocontent Logo usage guidelines (primary, secondary versions, spacing).
+- **Color Palette:**
+    - **Primary:** Energetic, trustworthy color (e.g., a vibrant blue or teal) used for key actions,
+      navigation, and branding accents.
+    - **Secondary:** Complementary colors for secondary actions, highlights, or specific UI states.
+    - **Neutrals:** A range of grays for backgrounds, text, borders, and disabled states. Crucial
+      for light/dark modes.
+    - **Feedback Colors:** Standard semantic colors (Green for success, Red for error, Yellow for
+      warning, Blue for informational).
+- **Typography:**
+    - **Font Family:** Choose clear, legible sans-serif web fonts (e.g., Inter, Poppins, Nunito
+      Sans) for UI elements and content. Consider a slightly more distinct font for headings if
+      desired.
+    - **Scale:** Define a typographic scale (H1-H6, Body (L, M, S), Caption, Overline) for
+      consistent hierarchy.
+    - **Weights & Styles:** Define standard weights (Regular, Medium, Semibold, Bold) and styles
+      (italic).
+- **Tone of Voice (Application UI):** Clear, concise, helpful, encouraging, slightly informal but
+  professional. Avoid overly technical jargon. (Distinct from the user-selectable _content_ tones).
+
 1.  **Intuitive & Clean User Interface (UI) & User Experience (UX):**
 
     - **Simplicity First:** Prioritize a user-centric design with minimal clutter, ensuring ease of

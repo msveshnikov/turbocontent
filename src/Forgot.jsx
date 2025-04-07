@@ -10,8 +10,7 @@ import {
     Heading,
     Text,
     useToast,
-    Container,
-    useColorModeValue
+    Container
 } from '@chakra-ui/react';
 import { API_URL } from './App';
 
@@ -20,8 +19,6 @@ const Forgot = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isEmailSent, setIsEmailSent] = useState(false);
     const toast = useToast();
-    const bgColor = useColorModeValue('white', 'gray.800');
-    const borderColor = useColorModeValue('gray.200', 'gray.600');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -59,17 +56,9 @@ const Forgot = () => {
 
     return (
         <Container maxW="container.sm" py={8}>
-            <Box
-                width="100%"
-                p={8}
-                borderRadius="lg"
-                bg={bgColor}
-                boxShadow="lg"
-                border="1px"
-                borderColor={borderColor}
-            >
+            <Box width="100%" p={8} borderRadius="lg" boxShadow="lg" border="1px">
                 <VStack spacing={6} align="stretch">
-                    <Heading as="h1" size="xl" textAlign="center" color="#3498DB">
+                    <Heading as="h1" size="xl" textAlign="center">
                         Reset Password
                     </Heading>
                     {!isEmailSent ? (
@@ -91,9 +80,6 @@ const Forgot = () => {
                                 mt={6}
                                 isLoading={isLoading}
                                 loadingText="Send Reset Link"
-                                bg="#3498DB"
-                                color="white"
-                                _hover={{ bg: '#3490D0' }}
                                 size="lg"
                                 borderRadius="md"
                             >
@@ -106,9 +92,8 @@ const Forgot = () => {
                         </Text>
                     )}
                     <Text textAlign="center" fontSize="md">
-                        Login{' '}
                         <Link to="/login">
-                            <Text as="span" color="#34A853" textDecoration="underline">
+                            <Text as="span" textDecoration="underline">
                                 Login
                             </Text>
                         </Link>

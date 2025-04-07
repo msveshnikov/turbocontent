@@ -9,8 +9,7 @@ import {
     VStack,
     Heading,
     useToast,
-    Container,
-    useColorModeValue
+    Container
 } from '@chakra-ui/react';
 import { API_URL } from './App';
 
@@ -82,20 +81,12 @@ const Reset = () => {
         }
     };
 
-    const cardBg = useColorModeValue('white', 'gray.700');
-
     return (
         <Container maxW="container.sm" py={8}>
-            <Box bgGradient="linear(to-r, #3498DB, #2980B9)" borderRadius="md" p={1}>
-                <Box bg={cardBg} borderRadius="md" p={8} boxShadow="lg">
+            <Box borderRadius="md" p={1}>
+                <Box borderRadius="md" p={8} boxShadow="lg">
                     <VStack spacing={6} align="stretch">
-                        <Heading
-                            as="h1"
-                            size="xl"
-                            textAlign="center"
-                            bgGradient="linear(to-r, #3498DB, #2980B9)"
-                            bgClip="text"
-                        >
+                        <Heading as="h1" size="xl" textAlign="center" bgClip="text">
                             Reset Password
                         </Heading>
                         <form onSubmit={handleSubmit}>
@@ -124,13 +115,10 @@ const Reset = () => {
                                 </FormControl>
                                 <Button
                                     type="submit"
-                                    bgGradient="linear(to-r, #3498DB, #2980B9)"
-                                    color="white"
                                     width="full"
                                     isLoading={isLoading}
                                     isDisabled={!isValidToken}
                                     size="lg"
-                                    _hover={{ bgGradient: 'linear(to-r, #2980B9, #2471A3)' }}
                                 >
                                     Reset Password
                                 </Button>

@@ -382,7 +382,7 @@ const Profile = () => {
                                     <Box pt={2}>
                                         <Button
                                             type="submit"
-                                            colorScheme="blue"
+                                            
                                             isLoading={isLoading}
                                             w={{ base: 'full', md: 'auto' }}
                                         >
