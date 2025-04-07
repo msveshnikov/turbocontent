@@ -21,6 +21,7 @@ import Reset from './Reset';
 import Profile from './Profile';
 import { BottomNavigationBar } from './BottomNavigationBar';
 import Content from './Content';
+import ContentId from './ContentId';
 
 const Admin = lazy(() => import('./Admin'));
 const Feedback = lazy(() => import('./Feedback'));
@@ -317,6 +318,7 @@ function App() {
                                             <Route path="/profile" element={<Profile />} />
                                             <Route path="/feedback" element={<Feedback />} />
                                             <Route path="/content" element={<Content />} />
+                                            <Route path="/content/:id" element={<ContentId />} />
                                             <Route
                                                 path="/reset-password/:token"
                                                 element={<Reset />}

@@ -18,6 +18,7 @@ import { getTextImageContent } from './gemini.js';
 import { promises as fsPromises } from 'fs';
 import { fetchSearchResults, searchWebContent } from './search.js';
 import { enrichMetadata } from './utils.js';
+import { Types } from 'mongoose';
 
 dotenv.config();
 
@@ -145,6 +146,25 @@ app.post('/api/generate-content', authenticateTokenOptional, async (req, res) =>
     } catch (error) {
         console.error('Error processing generate-content request:', error);
         res.status(500).json({ error: 'Failed to generate content', details: error.message });
+    }
+});
+
+app.get('/api/content/:id', async (req, res) => {
+    const { id } = req.params;
+
+    if (!Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'Invalid content ID' });
+    }
+
+    try {
+        const content = await Content.findById(id);
+        if (!content) {
+            return res.status(404).json({ error: 'Content not found' });
+        }
+        res.status(200).json(content);
+    } catch (error) {
+        console.error('Error fetching content by ID:', error);
+        res.status(500).json({ error: 'Failed to fetch content', details: error.message });
     }
 });
 
