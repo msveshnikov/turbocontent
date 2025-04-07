@@ -382,7 +382,6 @@ const Profile = () => {
                                     <Box pt={2}>
                                         <Button
                                             type="submit"
-                                            
                                             isLoading={isLoading}
                                             w={{ base: 'full', md: 'auto' }}
                                         >

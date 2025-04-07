@@ -102,12 +102,7 @@ const Login = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </FormControl>
-                            <Button
-                                type="submit"
-                                width="full"
-                                isLoading={isLoading}
-                                size="lg"
-                            >
+                            <Button type="submit" width="full" isLoading={isLoading} size="lg">
                                 Log In
                             </Button>
                             <GoogleLogin
