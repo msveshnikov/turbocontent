@@ -12,7 +12,7 @@ export default defineConfig({
                 short_name: 'Turbocontent',
                 description:
                     'Empowering users to effortlessly create compelling social media content.',
-                theme_color: '#F06292',
+                theme_color: '#00BCD4',
                 icons: [
                     {
                         src: 'android-chrome-192x192.png',
