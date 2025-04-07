@@ -614,8 +614,11 @@ function Content() {
                             </Alert>
                         )}
                         {loading && (
-                            <Flex justify="center" align="center" minH="200px">
-                                <Spinner size="xl" color="primary.500" thickness="4px" />
+                            <Flex justify="center" align="center" minH="200px" bg="whiteAlpha.500">
+                                {' '}
+                                {/* Added background to ensure visibility */}
+                                <Spinner size="xl" color="gray.500" thickness="4px" />{' '}
+                                {/* Changed spinner color to gray */}
                                 <Text ml={4}>Generating your content...</Text>
                             </Flex>
                         )}
