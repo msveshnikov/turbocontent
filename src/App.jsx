@@ -1,4 +1,12 @@
-import { ChakraProvider, Box, Container, VStack, extendTheme, Spinner, Center } from '@chakra-ui/react';
+import {
+    ChakraProvider,
+    Box,
+    Container,
+    VStack,
+    extendTheme,
+    Spinner,
+    Center
+} from '@chakra-ui/react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Landing } from './Landing';
 import { lazy, Suspense, createContext, useEffect, useState } from 'react';
@@ -95,7 +103,8 @@ const theme = extendTheme({
             800: '#C62828',
             900: '#B71C1C'
         },
-        warning: { // Note: Same as accent currently
+        warning: {
+            // Note: Same as accent currently
             50: '#FFFDE7',
             100: '#FFF9C4',
             200: '#FFF59D',
@@ -133,26 +142,30 @@ const theme = extendTheme({
                     color: 'white',
                     _hover: {
                         bg: 'primary.600',
-                        _disabled: { // Prevent hover effect when disabled
+                        _disabled: {
+                            // Prevent hover effect when disabled
                             bg: 'primary.300'
                         }
                     },
                     _active: {
                         bg: 'primary.700'
                     },
-                    _loading: { // Styles for loading state
+                    _loading: {
+                        // Styles for loading state
                         bg: 'primary.500', // Keep background
-                        color: 'white',    // Keep text/spinner color
-                        opacity: 0.6,      // Add opacity
+                        color: 'white', // Keep text/spinner color
+                        opacity: 0.6, // Add opacity
                         cursor: 'not-allowed',
-                         _hover: { // Prevent hover effect when loading
+                        _hover: {
+                            // Prevent hover effect when loading
                             bg: 'primary.500'
                         }
                     },
-                    _disabled: { // Styles for disabled state
+                    _disabled: {
+                        // Styles for disabled state
                         bg: 'primary.300', // Use lighter shade
                         opacity: 0.6,
-                        cursor: 'not-allowed',
+                        cursor: 'not-allowed'
                     }
                 },
                 secondary: {
@@ -160,26 +173,26 @@ const theme = extendTheme({
                     color: 'white',
                     _hover: {
                         bg: 'secondary.600',
-                         _disabled: {
-                           bg: 'secondary.300'
+                        _disabled: {
+                            bg: 'secondary.300'
                         }
                     },
                     _active: {
                         bg: 'secondary.700'
                     },
-                     _loading: {
+                    _loading: {
                         bg: 'secondary.500',
                         color: 'white',
                         opacity: 0.6,
                         cursor: 'not-allowed',
-                         _hover: {
+                        _hover: {
                             bg: 'secondary.500'
                         }
                     },
                     _disabled: {
                         bg: 'secondary.300',
                         opacity: 0.6,
-                        cursor: 'not-allowed',
+                        cursor: 'not-allowed'
                     }
                 },
                 accent: {
@@ -187,26 +200,26 @@ const theme = extendTheme({
                     color: 'neutral.800', // Dark text on yellow
                     _hover: {
                         bg: 'accent.600',
-                         _disabled: {
-                           bg: 'accent.300'
+                        _disabled: {
+                            bg: 'accent.300'
                         }
                     },
                     _active: {
                         bg: 'accent.700'
                     },
-                     _loading: {
+                    _loading: {
                         bg: 'accent.500',
                         color: 'neutral.800',
                         opacity: 0.6,
                         cursor: 'not-allowed',
-                         _hover: {
+                        _hover: {
                             bg: 'accent.500'
                         }
                     },
-                     _disabled: {
+                    _disabled: {
                         bg: 'accent.300',
                         opacity: 0.6,
-                        cursor: 'not-allowed',
+                        cursor: 'not-allowed'
                     }
                 }
             },
@@ -216,13 +229,13 @@ const theme = extendTheme({
         }
     },
     styles: {
-      global: {
-        body: {
-          bg: 'neutral.50', // Set a very light gray background globally
-          color: 'neutral.800', // Default text color
-        },
-      },
-    },
+        global: {
+            body: {
+                bg: 'neutral.50', // Set a very light gray background globally
+                color: 'neutral.800' // Default text color
+            }
+        }
+    }
 });
 
 function App() {
@@ -248,9 +261,9 @@ function App() {
                 })
                 .then((data) => {
                     if (data) {
-                       setUser(data);
+                        setUser(data);
                     } else {
-                       setUser(null); // Ensure user state is cleared on error/invalid token
+                        setUser(null); // Ensure user state is cleared on error/invalid token
                     }
                 })
                 .catch((error) => {
@@ -281,15 +294,20 @@ function App() {
                 >
                     <UserContext.Provider value={{ user, setUser }}>
                         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                             {/* Apply paddingBottom conditionally based on screen size for BottomNav */}
-                            <Box pb={{ base: '70px', md: '0' }} minH="100vh" bg="neutral.100"> {/* Keep slightly darker bg for content area */}
+                            {/* Apply paddingBottom conditionally based on screen size for BottomNav */}
+                            <Box pb={{ base: '70px', md: '0' }} minH="100vh" bg="neutral.100">
+                                {' '}
+                                {/* Keep slightly darker bg for content area */}
                                 <Navbar />
                                 <Container maxW="container.xl" py={8}>
                                     <VStack spacing={8} align="stretch">
                                         <Routes>
                                             <Route path="/" element={<Landing />} />
                                             {/* Consider removing /research if it's identical to / */}
-                                            <Route path="/research" element={<Navigate to="/" replace />} />
+                                            <Route
+                                                path="/research"
+                                                element={<Navigate to="/" replace />}
+                                            />
 
                                             <Route path="/privacy" element={<Privacy />} />
                                             <Route path="/terms" element={<Terms />} />
