@@ -1,4 +1,4 @@
-import { ChakraProvider, Box, Container, VStack, extendTheme } from '@chakra-ui/react';
+import { ChakraProvider, Box, Container, VStack, extendTheme, Spinner, Center } from '@chakra-ui/react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Landing } from './Landing';
 import { lazy, Suspense, createContext, useEffect, useState } from 'react';
@@ -27,11 +27,11 @@ const theme = extendTheme({
             50: '#E0F7FA',
             100: '#B2EBF2',
             200: '#80DEEA',
-            300: '#4DD0E1',
+            300: '#4DD0E1', // Used for disabled state
             400: '#26C6DA',
-            500: '#00BCD4',
-            600: '#00ACC1',
-            700: '#0097A7',
+            500: '#00BCD4', // Base color
+            600: '#00ACC1', // Hover color
+            700: '#0097A7', // Active color
             800: '#00838F',
             900: '#006064'
         },
@@ -39,11 +39,11 @@ const theme = extendTheme({
             50: '#F3E5F5',
             100: '#E1BEE7',
             200: '#CE93D8',
-            300: '#BA68C8',
+            300: '#BA68C8', // Used for disabled state
             400: '#AB47BC',
-            500: '#9C27B0',
-            600: '#8E24AA',
-            700: '#7B1FA2',
+            500: '#9C27B0', // Base color
+            600: '#8E24AA', // Hover color
+            700: '#7B1FA2', // Active color
             800: '#6A1B9A',
             900: '#4A148C'
         },
@@ -51,24 +51,24 @@ const theme = extendTheme({
             50: '#FFFDE7',
             100: '#FFF9C4',
             200: '#FFF59D',
-            300: '#FFF176',
+            300: '#FFF176', // Used for disabled state
             400: '#FFEE58',
-            500: '#FFEB3B',
-            600: '#FDD835',
-            700: '#FBC02D',
+            500: '#FFEB3B', // Base color
+            600: '#FDD835', // Hover color
+            700: '#FBC02D', // Active color
             800: '#F9A825',
             900: '#F57F17'
         },
         neutral: {
-            50: '#FAFAFA',
-            100: '#F5F5F5',
+            50: '#FAFAFA', // Consider for body background
+            100: '#F5F5F5', // Current Box background
             200: '#EEEEEE',
             300: '#E0E0E0',
             400: '#BDBDBD',
             500: '#9E9E9E',
             600: '#757575',
             700: '#616161',
-            800: '#424242',
+            800: '#424242', // Default text color
             900: '#212121'
         },
         success: {
@@ -95,7 +95,7 @@ const theme = extendTheme({
             800: '#C62828',
             900: '#B71C1C'
         },
-        warning: {
+        warning: { // Note: Same as accent currently
             50: '#FFFDE7',
             100: '#FFF9C4',
             200: '#FFF59D',
@@ -132,30 +132,81 @@ const theme = extendTheme({
                     bg: 'primary.500',
                     color: 'white',
                     _hover: {
-                        bg: 'primary.600'
+                        bg: 'primary.600',
+                        _disabled: { // Prevent hover effect when disabled
+                            bg: 'primary.300'
+                        }
                     },
                     _active: {
                         bg: 'primary.700'
+                    },
+                    _loading: { // Styles for loading state
+                        bg: 'primary.500', // Keep background
+                        color: 'white',    // Keep text/spinner color
+                        opacity: 0.6,      // Add opacity
+                        cursor: 'not-allowed',
+                         _hover: { // Prevent hover effect when loading
+                            bg: 'primary.500'
+                        }
+                    },
+                    _disabled: { // Styles for disabled state
+                        bg: 'primary.300', // Use lighter shade
+                        opacity: 0.6,
+                        cursor: 'not-allowed',
                     }
                 },
                 secondary: {
                     bg: 'secondary.500',
                     color: 'white',
                     _hover: {
-                        bg: 'secondary.600'
+                        bg: 'secondary.600',
+                         _disabled: {
+                           bg: 'secondary.300'
+                        }
                     },
                     _active: {
                         bg: 'secondary.700'
+                    },
+                     _loading: {
+                        bg: 'secondary.500',
+                        color: 'white',
+                        opacity: 0.6,
+                        cursor: 'not-allowed',
+                         _hover: {
+                            bg: 'secondary.500'
+                        }
+                    },
+                    _disabled: {
+                        bg: 'secondary.300',
+                        opacity: 0.6,
+                        cursor: 'not-allowed',
                     }
                 },
                 accent: {
                     bg: 'accent.500',
-                    color: 'neutral.800',
+                    color: 'neutral.800', // Dark text on yellow
                     _hover: {
-                        bg: 'accent.600'
+                        bg: 'accent.600',
+                         _disabled: {
+                           bg: 'accent.300'
+                        }
                     },
                     _active: {
                         bg: 'accent.700'
+                    },
+                     _loading: {
+                        bg: 'accent.500',
+                        color: 'neutral.800',
+                        opacity: 0.6,
+                        cursor: 'not-allowed',
+                         _hover: {
+                            bg: 'accent.500'
+                        }
+                    },
+                     _disabled: {
+                        bg: 'accent.300',
+                        opacity: 0.6,
+                        cursor: 'not-allowed',
                     }
                 }
             },
@@ -163,7 +214,15 @@ const theme = extendTheme({
                 variant: 'primary'
             }
         }
-    }
+    },
+    styles: {
+      global: {
+        body: {
+          bg: 'neutral.50', // Set a very light gray background globally
+          color: 'neutral.800', // Default text color
+        },
+      },
+    },
 });
 
 function App() {
@@ -177,10 +236,30 @@ function App() {
                     Authorization: `Bearer ${token}`
                 }
             })
-                .then((res) => res.json())
+                .then(async (res) => {
+                    if (!res.ok) {
+                        // If token is invalid/expired, remove it
+                        localStorage.removeItem('token');
+                        const errorData = await res.json().catch(() => ({})); // Catch non-JSON response
+                        console.error('Profile fetch error:', errorData.message || res.statusText);
+                        return null; // Indicate error or invalid token
+                    }
+                    return res.json();
+                })
                 .then((data) => {
-                    setUser(data);
+                    if (data) {
+                       setUser(data);
+                    } else {
+                       setUser(null); // Ensure user state is cleared on error/invalid token
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error fetching profile:', error);
+                    localStorage.removeItem('token'); // Clear token on network error too
+                    setUser(null);
                 });
+        } else {
+            setUser(null); // Ensure user is null if no token exists
         }
     }, []);
 
@@ -189,25 +268,28 @@ function App() {
             <ChakraProvider theme={theme}>
                 <Suspense
                     fallback={
-                        <Box
-                            display="flex"
-                            justifyContent="center"
-                            alignItems="center"
-                            height="100vh"
-                        >
-                            Loading...
-                        </Box>
+                        <Center height="100vh">
+                            <Spinner
+                                thickness="4px"
+                                speed="0.65s"
+                                emptyColor="gray.200"
+                                color="primary.500"
+                                size="xl"
+                            />
+                        </Center>
                     }
                 >
                     <UserContext.Provider value={{ user, setUser }}>
                         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                            <Box pb="50px" minH="100vh" bg="neutral.100">
+                             {/* Apply paddingBottom conditionally based on screen size for BottomNav */}
+                            <Box pb={{ base: '70px', md: '0' }} minH="100vh" bg="neutral.100"> {/* Keep slightly darker bg for content area */}
                                 <Navbar />
                                 <Container maxW="container.xl" py={8}>
-                                    <VStack spacing={8}>
+                                    <VStack spacing={8} align="stretch">
                                         <Routes>
                                             <Route path="/" element={<Landing />} />
-                                            <Route path="/research" element={<Landing />} />
+                                            {/* Consider removing /research if it's identical to / */}
+                                            <Route path="/research" element={<Navigate to="/" replace />} />
 
                                             <Route path="/privacy" element={<Privacy />} />
                                             <Route path="/terms" element={<Terms />} />
@@ -223,6 +305,7 @@ function App() {
                                             />
                                             <Route path="/admin" element={<Admin />} />
                                             <Route path="/docs/*" element={<Docs />} />
+                                            {/* Fallback route */}
                                             <Route path="*" element={<Navigate to="/" replace />} />
                                         </Routes>
                                     </VStack>

@@ -298,3 +298,5 @@ Turbocontent, leveraging the described project structure.
   infographic) and platform-specific content optimization.
 
 # TODO
+
+- fix Generate Content button spinner invisible (and button itself! - white fully)
