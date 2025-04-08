@@ -11,7 +11,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Landing } from './Landing';
 import { lazy, Suspense, createContext, useEffect, useState } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import Navbar from './Navbar';
+import Navbar from './TopNavigationBar';
 import Terms from './Terms';
 import Privacy from './Privacy';
 import Login from './Login';

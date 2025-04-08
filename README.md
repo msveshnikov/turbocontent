@@ -298,3 +298,5 @@ Turbocontent, leveraging the described project structure.
   infographic) and platform-specific content optimization.
 
 # TODO
+
+- use TopNavigationBar for desktop, BottomNavigationBar for mobile
