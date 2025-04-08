@@ -5,7 +5,8 @@ import {
     VStack,
     extendTheme,
     Spinner,
-    Center
+    Center,
+    useMediaQuery
 } from '@chakra-ui/react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Landing } from './Landing';
@@ -36,11 +37,11 @@ const theme = extendTheme({
             50: '#E0F7FA',
             100: '#B2EBF2',
             200: '#80DEEA',
-            300: '#4DD0E1', // Used for disabled state
+            300: '#4DD0E1',
             400: '#26C6DA',
-            500: '#00BCD4', // Base color
-            600: '#00ACC1', // Hover color
-            700: '#0097A7', // Active color
+            500: '#00BCD4',
+            600: '#00ACC1',
+            700: '#0097A7',
             800: '#00838F',
             900: '#006064'
         },
@@ -48,11 +49,11 @@ const theme = extendTheme({
             50: '#F3E5F5',
             100: '#E1BEE7',
             200: '#CE93D8',
-            300: '#BA68C8', // Used for disabled state
+            300: '#BA68C8',
             400: '#AB47BC',
-            500: '#9C27B0', // Base color
-            600: '#8E24AA', // Hover color
-            700: '#7B1FA2', // Active color
+            500: '#9C27B0',
+            600: '#8E24AA',
+            700: '#7B1FA2',
             800: '#6A1B9A',
             900: '#4A148C'
         },
@@ -60,24 +61,24 @@ const theme = extendTheme({
             50: '#FFFDE7',
             100: '#FFF9C4',
             200: '#FFF59D',
-            300: '#FFF176', // Used for disabled state
+            300: '#FFF176',
             400: '#FFEE58',
-            500: '#FFEB3B', // Base color
-            600: '#FDD835', // Hover color
-            700: '#FBC02D', // Active color
+            500: '#FFEB3B',
+            600: '#FDD835',
+            700: '#FBC02D',
             800: '#F9A825',
             900: '#F57F17'
         },
         neutral: {
-            50: '#FAFAFA', // Consider for body background
-            100: '#F5F5F5', // Current Box background
+            50: '#FAFAFA',
+            100: '#F5F5F5',
             200: '#EEEEEE',
             300: '#E0E0E0',
             400: '#BDBDBD',
             500: '#9E9E9E',
             600: '#757575',
             700: '#616161',
-            800: '#424242', // Default text color
+            800: '#424242',
             900: '#212121'
         },
         success: {
@@ -105,7 +106,6 @@ const theme = extendTheme({
             900: '#B71C1C'
         },
         warning: {
-            // Note: Same as accent currently
             50: '#FFFDE7',
             100: '#FFF9C4',
             200: '#FFF59D',
@@ -144,7 +144,6 @@ const theme = extendTheme({
                     _hover: {
                         bg: 'primary.600',
                         _disabled: {
-                            // Prevent hover effect when disabled
                             bg: 'primary.300'
                         }
                     },
@@ -152,19 +151,16 @@ const theme = extendTheme({
                         bg: 'primary.700'
                     },
                     _loading: {
-                        // Styles for loading state
-                        bg: 'primary.500', // Keep background
-                        color: 'white', // Keep text/spinner color
-                        opacity: 0.6, // Add opacity
+                        bg: 'primary.500',
+                        color: 'white',
+                        opacity: 0.6,
                         cursor: 'not-allowed',
                         _hover: {
-                            // Prevent hover effect when loading
                             bg: 'primary.500'
                         }
                     },
                     _disabled: {
-                        // Styles for disabled state
-                        bg: 'primary.300', // Use lighter shade
+                        bg: 'primary.300',
                         opacity: 0.6,
                         cursor: 'not-allowed'
                     }
@@ -198,7 +194,7 @@ const theme = extendTheme({
                 },
                 accent: {
                     bg: 'accent.500',
-                    color: 'neutral.800', // Dark text on yellow
+                    color: 'neutral.800',
                     _hover: {
                         bg: 'accent.600',
                         _disabled: {
@@ -232,8 +228,8 @@ const theme = extendTheme({
     styles: {
         global: {
             body: {
-                bg: 'neutral.50', // Set a very light gray background globally
-                color: 'neutral.800' // Default text color
+                bg: 'neutral.50',
+                color: 'neutral.800'
             }
         }
     }
@@ -241,6 +237,7 @@ const theme = extendTheme({
 
 function App() {
     const [user, setUser] = useState();
+    const [isLargerThanMD] = useMediaQuery('(min-width: 768px)');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -252,11 +249,10 @@ function App() {
             })
                 .then(async (res) => {
                     if (!res.ok) {
-                        // If token is invalid/expired, remove it
                         localStorage.removeItem('token');
-                        const errorData = await res.json().catch(() => ({})); // Catch non-JSON response
+                        const errorData = await res.json().catch(() => ({}));
                         console.error('Profile fetch error:', errorData.message || res.statusText);
-                        return null; // Indicate error or invalid token
+                        return null;
                     }
                     return res.json();
                 })
@@ -264,16 +260,16 @@ function App() {
                     if (data) {
                         setUser(data);
                     } else {
-                        setUser(null); // Ensure user state is cleared on error/invalid token
+                        setUser(null);
                     }
                 })
                 .catch((error) => {
                     console.error('Error fetching profile:', error);
-                    localStorage.removeItem('token'); // Clear token on network error too
+                    localStorage.removeItem('token');
                     setUser(null);
                 });
         } else {
-            setUser(null); // Ensure user is null if no token exists
+            setUser(null);
         }
     }, []);
 
@@ -295,21 +291,16 @@ function App() {
                 >
                     <UserContext.Provider value={{ user, setUser }}>
                         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                            {/* Apply paddingBottom conditionally based on screen size for BottomNav */}
                             <Box pb={{ base: '70px', md: '0' }} minH="100vh" bg="neutral.100">
-                                {' '}
-                                {/* Keep slightly darker bg for content area */}
-                                <Navbar />
+                                {isLargerThanMD ? <Navbar /> : null}
                                 <Container maxW="container.xl" py={8}>
                                     <VStack spacing={8} align="stretch">
                                         <Routes>
                                             <Route path="/" element={<Landing />} />
-                                            {/* Consider removing /research if it's identical to / */}
                                             <Route
                                                 path="/research"
                                                 element={<Navigate to="/" replace />}
                                             />
-
                                             <Route path="/privacy" element={<Privacy />} />
                                             <Route path="/terms" element={<Terms />} />
                                             <Route path="/login" element={<Login />} />
@@ -325,12 +316,11 @@ function App() {
                                             />
                                             <Route path="/admin" element={<Admin />} />
                                             <Route path="/docs/*" element={<Docs />} />
-                                            {/* Fallback route */}
                                             <Route path="*" element={<Navigate to="/" replace />} />
                                         </Routes>
                                     </VStack>
                                 </Container>
-                                <BottomNavigationBar />
+                                {!isLargerThanMD ? <BottomNavigationBar /> : null}
                             </Box>
                         </Router>
                     </UserContext.Provider>
