@@ -18,14 +18,14 @@ import Login from './Login';
 import SignUp from './SignUp';
 import Forgot from './Forgot';
 import Reset from './Reset';
-import Profile from './Profile';
 import { BottomNavigationBar } from './BottomNavigationBar';
-import Content from './Content';
-import ContentId from './ContentId';
 
 const Admin = lazy(() => import('./Admin'));
 const Feedback = lazy(() => import('./Feedback'));
 const Docs = lazy(() => import('./Docs'));
+const Content = lazy(() => import('./Content'));
+const ContentId = lazy(() => import('./ContentId'));
+const Profile = lazy(() => import('./Profile'));
 
 export const API_URL = import.meta.env.DEV ? 'http://localhost:3000' : 'https://turbocontent.art';
 export const UserContext = createContext(null);
